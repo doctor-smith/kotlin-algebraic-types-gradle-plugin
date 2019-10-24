@@ -5,6 +5,7 @@ plugins {
     `kotlin-dsl`
     java
     groovy
+    id ("com.github.hierynomus.license") version "0.15.0"
 }
 
 group = "org.drx"
@@ -54,7 +55,7 @@ tasks {
     val javadocJar by creating(Jar::class) {
         dependsOn(JavaPlugin.JAVADOC_TASK_NAME)
         classifier = "javadoc"
-        from(tasks["javadoc"])
+        //from(tasks.get("javadoc"))
     }
 /*
     val dokkaJar by creating(Jar::class) {
