@@ -17,18 +17,10 @@ package org.drx.plugin.algebraictypes
 
 import org.junit.Test
 
-class DualityTest {
+class AuxTest {
 
-    @Test
-    fun test() {
-
-        println(buildOpposeProductFunction(4))
-
-        println(buildOpposeSumFunction(4))
-
-        println(buildSumMeasureFunction(4))
-
-        println(buildSimpleSumMeasureFunction(4))
+    @Test fun commentTest() {
+        println(buildComment("This", "is","a", "fucking", "comment" ))
     }
 
 }

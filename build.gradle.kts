@@ -12,12 +12,14 @@ group = "org.drx"
 version = "1.0.0"
 
 repositories {
+    mavenLocal()
     mavenCentral()
     jcenter()
 }
 
 dependencies {
     implementation(kotlin("stdlib"))
+    //implementation(kotlin("kotlin-gradle-plugin"))
     implementation(gradleApi())
     implementation(localGroovy())
     compile("org.codehaus.groovy:groovy-all:2.4.15")
@@ -27,7 +29,7 @@ dependencies {
 gradlePlugin {
     plugins {
         create("KotlinAlgebraicTypesPlugin") {
-            id = "org.drx.algebraic-types-plugin"
+            id = "org.drx.kotlin-algebraic-types-plugin"
             implementationClass = "org.drx.plugin.algebraictypes.KotlinAlgebraicTypesPlugin"
         }
     }

@@ -15,6 +15,7 @@
  */
 package org.drx.plugin.algebraictypes
 
+import org.drx.plugin.algebraictypes.task.GenerateTypes
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.SourceSet
@@ -29,19 +30,32 @@ class KotlinAlgebraicTypesPluginTest {
     @Test
     fun pluginAddsTasksToProject() {
         val project: Project = ProjectBuilder.builder().build()
-        project.pluginManager.apply ("org.drx.algebraic-types-plugin")
+        project.pluginManager.apply (KotlinAlgebraicTypesPlugin::class.java)
 
-        assert(project.tasks.getByName("generateSumType") is GenerateSumType)
-        assert(project.tasks.getByName("generateSumTypes") is GenerateSumTypes)
+        assert(project.tasks.getByName("generateAlgebraicTypes") is GenerateTypes)
+
+        /*assert(project.tasks.getByName("generateSumTypes") is GenerateSumTypes)
         assert(project.tasks.getByName("generateProductType") is GenerateProductType)
         assert(project.tasks.getByName("generateProductTypes") is GenerateProductTypes)
 
+        assert(project.tasks.getByName("generateDuality") is GenerateDuality)
+        assert(project.tasks.getByName("generateDualities") is GenerateDualities)
+        assert(project.tasks.getByName("generateProductTypeArithmetic") is GenerateProductTypeArithmetic)
+        assert(project.tasks.getByName("generateProductTypeArithmetics") is GenerateProductTypeArithmetics)
+        assert(project.tasks.getByName("generateEvoleqProduct") is GenerateEvoleqProduct)
+        assert(project.tasks.getByName("generateEvoleqProducts") is GenerateEvoleqProducts)
+        assert(project.tasks.getByName("generateEvoleqSum") is GenerateEvoleqSum)
+        assert(project.tasks.getByName("generateEvoleqSums") is GenerateEvoleqSums)
+
+
+         */
     }
+
 
     @Test
     fun pluginAddsGeneratedSourceSetAndAddsOutputToClasspathOfMain() {
         val project: Project = ProjectBuilder.builder().build()
-        project.pluginManager.apply ("org.drx.algebraic-types-plugin")
+        project.pluginManager.apply(KotlinAlgebraicTypesPlugin::class.java) //("org.drx.kotlin-algebraic-types-plugin")
 
         //val s = JavaPluginConvention::class.qualifiedName
         project.withConvention(JavaPluginConvention::class){
@@ -51,6 +65,18 @@ class KotlinAlgebraicTypesPluginTest {
             assert(m.runtimeClasspath.files.map{it.absolutePath}.filter { it.endsWith("generated") }.size == 2)
 
         }
+
+
+    }
+
+    //@Test
+    fun  testAlgebraicTypesExtension() {
+        val project: Project = ProjectBuilder.builder().build()
+
+        project.pluginManager.apply (KotlinAlgebraicTypesPlugin::class.java)
+
+
+
     }
 
     @Test

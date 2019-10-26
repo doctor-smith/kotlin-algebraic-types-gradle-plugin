@@ -74,8 +74,8 @@ fun generateEvoleqSum(dimension: Int, project: Project) {
     evoleqProduct += "import org.drx.evoleq.flow.Evolver\n"
     evoleqProduct += "import org.drx.evoleq.evolving.Evolving\n"
     evoleqProduct += "import org.drx.generated.products.Product$dimension\n"
-    evoleqProduct += "import org.drx.generated.sums.Sum$dimension\n"
-
+    evoleqProduct += "import org.drx.generated.sums.Sum$dimension\n\n"
+    evoleqProduct += dist()
     evoleqProduct += buildSumEvolveFunction(dimension)
     evoleqProduct += dist()
     evoleqProduct += buildSumGetFunction(dimension)
@@ -87,21 +87,49 @@ fun generateEvoleqSum(dimension: Int, project: Project) {
 }
 
 fun buildSumEvolveFunction(dimension: Int): String {
-    val types = IntRange(1, dimension).reversed().joinToString(", ") { "T$it" }
-    val evolverTypes = IntRange(1, dimension).reversed().joinToString(", ", "", "") { "Evolver<T$it>" }
-    val evolvingTypes = IntRange(1, dimension).reversed().joinToString(", ") { "Evolving<T$it>" }
-    //val factors = IntRange(1, dimension).reversed().joinToString(", ") { "\n    factor$it.evolve( product.factor$it )" }
-    val cases1 = IntRange(1,dimension).reversed().joinToString("") { "\n    is Sum$dimension.Summand$it -> Sum$dimension.Summand$it( factor$it.evolve( sum.value ) )" }
-    val cases2 = IntRange(1,dimension).reversed().joinToString("") { "\n    is Sum$dimension.Summand$it -> Sum$dimension.Summand$it( value.evolve( product.factor$it ) )" }
 
-    return "suspend fun <$types> Product$dimension<$evolverTypes>.evolve(sum: Sum$dimension<$types>) : Sum$dimension<$evolvingTypes> = when( sum ) { $cases1 \n}" +
+    val progression = IntRange(1, dimension).reversed()
+
+    val types = progression.joinToString(", ") { "T$it" }
+    val evolverTypes = progression.joinToString(", ", "", "") { "Evolver<T$it>" }
+    val evolvingTypes = progression.joinToString(", ") { "Evolving<T$it>" }
+    val injections = progression.joinToString(", ") { "(D) -> T$it" }
+    val cases1 = progression.joinToString("") { "\n    is Sum$dimension.Summand$it -> Sum$dimension.Summand$it( factor$it.evolve( sum.value ) )" }
+    val cases2 = progression.joinToString("") { "\n    is Sum$dimension.Summand$it -> Sum$dimension.Summand$it( value.evolve( product.factor$it ) )" }
+    val cases3 = progression.joinToString("") { "\n    is Sum$dimension.Summand$it -> value.evolve( data )" }
+    val cases4 = progression.joinToString("") { "\n    is Sum$dimension.Summand$it -> Sum$dimension.Summand$it( (factor2 as Sum3.Summand$it<$evolverTypes>).value.evolve( factor1.factor$it( data ) ) )" }
+    val comment1 = buildComment(
+            "Evolve a sum type"
+    )
+    val comment2 = buildComment(
+            "Evolve with respect to sum-type-flow"
+    )
+    val comment3 = buildComment(
+            "Evolve with respect to sum-type-flow"
+    )
+    val comment4 = buildComment(
+            "Evolve with respect to sum-type-flow with dynamic data"
+    )
+    val comment5 = buildComment(
+            "Setup dynamic Sum$dimension evolver"
+    )
+    return "${comment1}suspend fun <$types> Product$dimension<$evolverTypes>.evolve(sum: Sum$dimension<$types>) : Sum$dimension<$evolvingTypes> = when( sum ) { $cases1 \n}" +
             dist() +
-            "suspend fun <$types> Sum$dimension<$evolverTypes>.evolve(product: Product$dimension<$types>) : Sum$dimension<$evolvingTypes> = when( this ) { $cases2 \n}"
+            "${comment2}suspend fun <$types> Sum$dimension<$evolverTypes>.evolve(product: Product$dimension<$types>) : Sum$dimension<$evolvingTypes> = when( this ) { $cases2 \n}" +
+            dist() +
+            "${comment3}suspend fun <D> Sum$dimension<${progression.joinToString(", ") { "Evolver<D>" }}>.evolve(data: D): Evolving<D> = when( this ) {$cases3\n}" +
+            dist() +
+            "${comment4}suspend fun <D, $types> Product2<Sum$dimension<$evolverTypes>, Product$dimension<$injections>>.evolve( data : D): Sum$dimension<$evolvingTypes> = when( factor2 ) {$cases4\n}" +
+            dist() +
+            "${comment5}@Suppress(\"FunctionName\")\nfun <D, $types> Sum${dimension}Evolver(evolver: Sum$dimension<$evolverTypes>, data: ()->Product$dimension<$injections>): Product2<Sum$dimension<$evolverTypes>, Product$dimension<$injections>> = Product2(evolver, data())"
+
 }
 fun buildSumGetFunction(dimension: Int): String {
-    val types = IntRange(1, dimension).reversed().joinToString(", ") { "T$it" }
-    val evolvingTypes = IntRange(1, dimension).reversed().joinToString(", ") { "Evolving<T$it>" }
-    val cases = IntRange(1, dimension).reversed().joinToString("") { "\n    is Sum$dimension.Summand$it -> Sum$dimension.Summand$it( value.get() )" }
+    val progression = IntRange(1, dimension).reversed()
+
+    val types = progression.joinToString(", ") { "T$it" }
+    val evolvingTypes = progression.joinToString(", ") { "Evolving<T$it>" }
+    val cases = progression.joinToString("") { "\n    is Sum$dimension.Summand$it -> Sum$dimension.Summand$it( value.get() )" }
 
 
     return "suspend fun <$types> Sum$dimension<$evolvingTypes>.get() : Sum$dimension<$types> = when( this ) { $cases \n}"

@@ -26,6 +26,8 @@ class EvoleqProductsTest {
 
         println(buildProductEvolveFunction(3))
 
+        println(buildProductEvolveFunctionWithSideEffect(3))
+
         println(buildProductGetFunction(10))
 
 

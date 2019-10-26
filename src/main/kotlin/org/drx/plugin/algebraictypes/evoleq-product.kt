@@ -71,13 +71,19 @@ fun generateEvoleqProduct(dimension: Int, project: Project) {
     var evoleqProduct = license()
 
     evoleqProduct += "\n\npackage org.drx.generated.evoleq.products\n\n\n"
+    evoleqProduct += "import kotlinx.coroutines.CoroutineScope\n"
+    evoleqProduct += "import kotlinx.coroutines.coroutineScope\n"
     evoleqProduct += "import org.drx.evoleq.flow.Evolver\n"
     evoleqProduct += "import org.drx.evoleq.evolving.Evolving\n"
-    evoleqProduct += "import org.drx.generated.products.Product$dimension\n"
-
+    evoleqProduct += "import org.drx.evoleq.evolving.Parallel\n"
+    evoleqProduct += "import org.drx.generated.products.Product$dimension\n\n"
+    evoleqProduct += dist()
     evoleqProduct += buildProductEvolveFunction(dimension)
     evoleqProduct += dist()
+    evoleqProduct += buildProductEvolveFunctionWithSideEffect(dimension)
+    evoleqProduct += dist()
     evoleqProduct += buildProductGetFunction(dimension)
+
 
 
     val evoleqProductFile = File("${project.projectDir}$basePath/evoleq/products/product-$dimension.kt")
@@ -89,15 +95,23 @@ fun buildProductEvolveFunction(dimension: Int): String {
     val types = IntRange(1, dimension).reversed().joinToString(", ") { "T$it" }
     val evolverTypes = IntRange(1, dimension).reversed().joinToString(", ", "", "") { "Evolver<T$it>" }
     val evolvingTypes = IntRange(1, dimension).reversed().joinToString(", ") { "Evolving<T$it>" }
-    val factors = IntRange(1, dimension).reversed().joinToString(", ") { "\n    factor$it.evolve( product.factor$it )" }
+    val factors = IntRange(1, dimension).reversed().joinToString(", ") { "factor$it.evolve( product.factor$it )" }
 
-    return "suspend fun <$types> Product$dimension<$evolverTypes>.evolve(product: Product$dimension<$types>) : Product$dimension<$evolvingTypes> = Product$dimension($factors\n)"
+    return "${buildComment("Evolve a product type with a product evolver")}suspend fun <$types> Product$dimension<$evolverTypes>.evolve(product: Product$dimension<$types>) : Product$dimension<$evolvingTypes> = Product$dimension($factors)"
 }
+
+fun buildProductEvolveFunctionWithSideEffect(dimension: Int): String {
+    val types = IntRange(1, dimension).reversed().joinToString(", ") { "T$it" }
+    val evolverTypes = IntRange(1, dimension).reversed().joinToString(", ", "", "") { "Evolver<T$it>" }
+
+    return "${buildComment("Obtain product evolver with parallel side-effect")}@Suppress(\"FunctionName\")\nsuspend fun <$types> Product${dimension}Evolver(evolver: Product$dimension<$evolverTypes>, sideEffect: suspend CoroutineScope.()->Parallel<Unit>): Product$dimension<$evolverTypes> {\n    coroutineScope{ sideEffect().get() }\n    return evolver\n}"
+}
+
 fun buildProductGetFunction(dimension: Int): String {
     val types = IntRange(1, dimension).reversed().joinToString(", ") { "T$it" }
     val evolvingTypes = IntRange(1, dimension).reversed().joinToString(", ") { "Evolving<T$it>" }
-    val factors = IntRange(1, dimension).reversed().joinToString(", ") { "\n    factor$it.get()" }
+    val factors = IntRange(1, dimension).reversed().joinToString(", ") { "factor$it.get()" }
 
 
-    return "suspend fun <$types> Product$dimension<$evolvingTypes>.get() : Product$dimension<$types> = Product$dimension($factors\n)"
+    return "${buildComment("Evolving product getter function")}suspend fun <$types> Product$dimension<$evolvingTypes>.get() : Product$dimension<$types> = Product$dimension($factors)"
 }

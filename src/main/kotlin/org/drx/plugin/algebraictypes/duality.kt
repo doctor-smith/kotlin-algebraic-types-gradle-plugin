@@ -24,6 +24,7 @@ import java.io.File
 import kotlin.math.max
 
 
+
 open class GenerateDuality: DefaultTask() {
     @Suppress("UnstableApiUsage")
     @set:Option(option = "dimension", description = "The number of factors of the product-type to be generated")
@@ -85,6 +86,11 @@ fun buildDuals(dimension: Int): String {
     result += buildOpposeProductFunction(dimension)
     result += dist()
     result += buildOpposeSumFunction(dimension)
+    result += dist()
+    result += buildSumMeasureFunction(dimension)
+    result += dist()
+    result += buildSimpleSumMeasureFunction(dimension)
+
     return result
 }
 
@@ -124,3 +130,30 @@ fun buildOpposedFunctionArgs(dimension: Int, sourceType: String = "S",targetType
     }
     return list.joinToString(",\n    ", "\n    ", "\n")
 }
+
+
+fun buildSumMeasureFunction(dimension: Int): String {
+    val range = IntRange(1,dimension).reversed()
+
+    val comment = buildComment("Measure a sum type")
+    val types = range.joinToString(", ") { "T$it" }
+    val measures = range.joinToString(", ") { "(T$it) -> M" }
+    val cases = range.joinToString("") { "\n    is Sum$dimension.Summand$it -> measure.factor$it( value )" }
+
+
+    return "${comment}fun <M, $types> Sum$dimension<$types>.measure(measure: Product$dimension<$measures>): M = when( this ) {$cases\n}"
+}
+
+
+fun buildSimpleSumMeasureFunction(dimension: Int): String {
+    val range = IntRange(1,dimension).reversed()
+
+    val comment = buildComment("Measure a sum type")
+    val types = range.joinToString(", ") { "T" }
+    //val measures = range.joinToString(", ") { "(T$it) -> M" }
+    val cases = range.joinToString("") { "\n    is Sum$dimension.Summand$it -> measure( value )" }
+
+
+    return "${comment}fun <M, T> Sum$dimension<$types>.measure(measure: (T) -> M): M = when( this ) {$cases\n}"
+}
+

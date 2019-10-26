@@ -53,3 +53,7 @@ public fun buildGenericTypes(dimension: Int, type: String, index: Int, typeAtInd
 }
 
 public fun buildIdLambda(type: String) = "{ ${type.toLowerCase()} : ${type.toUpperCase()} -> ${type.toLowerCase()} }"
+
+fun buildComment(vararg lines: String): String {
+    return lines.joinToString("\n * ", "/**\n * ", "\n */\n") { it }
+}
