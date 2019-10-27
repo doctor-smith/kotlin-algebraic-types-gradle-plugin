@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.plugin.algebraictypes
+package org.drx.plugin.algebraictypes.generate
 
-import org.gradle.api.DefaultTask
+import org.drx.plugin.algebraictypes.basePath
 import org.gradle.api.Project
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.options.Option
 import java.io.File
-import kotlin.math.max
 
+/*
 open class GenerateEvoleqProduct: DefaultTask() {
     @Suppress("UnstableApiUsage")
     @set:Option(option = "dimension", description = "The dimension")
@@ -60,7 +57,7 @@ open class GenerateEvoleqProducts: DefaultTask() {
         }
     }
 }
-
+*/
 fun generateEvoleqProduct(dimension: Int, project: Project) {
     val dir = File("${project.projectDir}$basePath/evoleq/products")
     if(!dir.exists()) {

@@ -16,6 +16,7 @@
 package org.drx.plugin.algebraictypes.task
 
 import org.drx.plugin.algebraictypes.*
+import org.drx.plugin.algebraictypes.generate.*
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction

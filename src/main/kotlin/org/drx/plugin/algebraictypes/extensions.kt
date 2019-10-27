@@ -51,6 +51,13 @@ open class DimensionSelectionExtension {
         dimensionSelection = DimensionSelection.Single(dimension)
     }
 
+    fun dimension(dimension: Int) {
+        if(dimensionSelection != null) {
+            throw Exception("Selection already set")
+        }
+        dimensionSelection = DimensionSelection.Single(dimension)
+    }
+
     fun list(vararg dimensions: Int) {
         if(dimensionSelection != null) {
             throw Exception("Selection already set")
@@ -88,8 +95,8 @@ fun AlgebraicTypesExtension.sums(configuration: DimensionSelectionExtension.()->
     sumTypes = extension.dimensionSelection
 }
 
-fun AlgebraicTypesExtension.productArithmetics(configuration: SingleDimensionSelectionExtension.()->Unit) {
-    val extension = SingleDimensionSelectionExtension()
+fun AlgebraicTypesExtension.productArithmetics(configuration: DimensionSelectionExtension.()->Unit) {
+    val extension = DimensionSelectionExtension()
     extension.configuration()
     productTypeArithmetics = extension.dimensionSelection
 }
