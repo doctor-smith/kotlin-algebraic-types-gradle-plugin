@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.drx.plugin.algebraictypes
+package org.drx.plugin.algebraictypes.generate
 
 
 // One can add (SumX)->T + (SumY)->T = (Sum(X+Y))->T bby first opposing the summands one by one,
@@ -31,13 +31,13 @@ fun buildSumOperator(dimension: Int, first: Int) : String {
     var factorsList = arrayListOf<String>()
     if(second > 1 && first > 1) {
         result = "operator fun <${buildGenericTypes(dimension, "S")}, T> "
-        result += "((Sum$second<${buildGenericTypes(dimension, "S", first +1)}>)->T).plus(other: (Sum$first<${buildGenericTypes(first, "S")}>)->T) : (Sum$dimension<${buildGenericTypes(dimension,"S")}>)->T = "
+        result += "((Sum$second<${buildGenericTypes(dimension, "S", first + 1)}>)->T).plus(other: (Sum$first<${buildGenericTypes(first, "S")}>)->T) : (Sum$dimension<${buildGenericTypes(dimension, "S")}>)->T = "
         result += "(this.oppose() * other.oppose()).oppose()"
     }
 
     if(second == 1 && first >1) {
         result = "operator fun <${buildGenericTypes(dimension, "S")}, T> "
-        result += "((S$dimension)->T).plus(other: (Sum$first<${buildGenericTypes(first, "S")}>)->T) : (Sum$dimension<${buildGenericTypes(dimension,"S")}>)->T = "
+        result += "((S$dimension)->T).plus(other: (Sum$first<${buildGenericTypes(first, "S")}>)->T) : (Sum$dimension<${buildGenericTypes(dimension, "S")}>)->T = "
         result += "(this * other.oppose()).oppose()"
     }
 

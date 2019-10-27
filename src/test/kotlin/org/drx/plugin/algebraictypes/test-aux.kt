@@ -15,12 +15,13 @@
  */
 package org.drx.plugin.algebraictypes
 
+import org.drx.plugin.algebraictypes.generate.buildComment
 import org.junit.Test
 
 class AuxTest {
 
     @Test fun commentTest() {
-        println(buildComment("This", "is","a", "fucking", "comment" ))
+        println(buildComment("This", "is", "a", "fucking", "comment"))
     }
 
 }

@@ -15,6 +15,7 @@
  */
 package org.drx.plugin.algebraictypes
 
+import org.drx.plugin.algebraictypes.generate.buildProductOperator
 import org.junit.Test
 
 class ProductTypeArithmeticTest {

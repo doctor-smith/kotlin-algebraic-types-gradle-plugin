@@ -13,18 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.plugin.algebraictypes
+package org.drx.plugin.algebraictypes.generate
 
-import org.gradle.api.DefaultTask
+import org.drx.plugin.algebraictypes.basePath
 import org.gradle.api.Project
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.options.Option
 import java.io.File
-import kotlin.math.max
 
 
-
+/*
 open class GenerateDuality: DefaultTask() {
     @Suppress("UnstableApiUsage")
     @set:Option(option = "dimension", description = "The number of factors of the product-type to be generated")
@@ -59,7 +55,7 @@ open class GenerateDualities: DefaultTask() {
         }
     }
 }
-
+*/
 
 
 fun generateDuality(dimension: Int, project: Project){
@@ -96,23 +92,23 @@ fun buildDuals(dimension: Int): String {
 
 fun buildOpposeProductFunction(dimension: Int) : String {
 
-    val types = buildGenericTypes(dimension,"F")
+    val types = buildGenericTypes(dimension, "F")
     val list = arrayListOf<String>()
     val comment = buildComment("Turn a product of functions (F_i)->T into a", "function whose domain is a sum")
     IntRange(1,dimension).forEach {
         list.add(0, "factor$it")
     }
-    return "$comment fun <$types ,T> Product$dimension<${buildFunctionTypes(dimension,"F")}>.oppose(): (Sum$dimension<$types>)->T = sum(${list.joinToString(",\n    ", "\n    ", "\n")})"
+    return "$comment fun <$types ,T> Product$dimension<${buildFunctionTypes(dimension, "F")}>.oppose(): (Sum$dimension<$types>)->T = sum(${list.joinToString(",\n    ", "\n    ", "\n")})"
 }
 
 fun buildOpposeSumFunction(dimension: Int) : String {
-    val types = buildGenericTypes(dimension,"F")
+    val types = buildGenericTypes(dimension, "F")
     val list = arrayListOf<String>()
     IntRange(1,dimension).forEach {
         list.add(0, "factor$it")
     }
     val comment = buildComment("Turn a function (Sum<F_n,...,F_1)->T", "into a product of functions")
-    return "fun <$types ,T> ((Sum$dimension<$types>)->T).oppose(): Product$dimension<${buildFunctionTypes(dimension,"F")}> = Product$dimension(${buildOpposedFunctionArgs(dimension,"F")})"
+    return "fun <$types ,T> ((Sum$dimension<$types>)->T).oppose(): Product$dimension<${buildFunctionTypes(dimension, "F")}> = Product$dimension(${buildOpposedFunctionArgs(dimension, "F")})"
 
 }
 
@@ -128,7 +124,7 @@ fun buildOpposedFunctionArgs(dimension: Int, sourceType: String = "S",targetType
     val list = arrayListOf<String>()
     val sourceArg = sourceType.toLowerCase()
     IntRange(1,dimension).forEach {
-        list.add(0,"{$sourceArg: $sourceType$it -> this@oppose(iota${dimension}_$it<${buildGenericTypes(dimension,"F")}>()($sourceArg))}")
+        list.add(0,"{$sourceArg: $sourceType$it -> this@oppose(iota${dimension}_$it<${buildGenericTypes(dimension, "F")}>()($sourceArg))}")
     }
     return list.joinToString(",\n    ", "\n    ", "\n")
 }

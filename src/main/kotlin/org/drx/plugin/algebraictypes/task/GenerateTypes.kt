@@ -16,6 +16,7 @@
 package org.drx.plugin.algebraictypes.task
 
 import org.drx.plugin.algebraictypes.*
+import org.drx.plugin.algebraictypes.generate.*
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
@@ -41,32 +42,32 @@ open class GenerateTypes : DefaultTask() {
         // TODO optimize generation process
         // generate
         if(extension.evoleqSums != null) {
-            extension.evoleqSums!!.toList().forEach {
+            extension.evoleqSums!!.toSet().forEach {
                 generateEvoleqSum(it, project)
             }
         }
         if(extension.evoleqProducts != null) {
-            extension.evoleqProducts!!.toList().forEach {
+            extension.evoleqProducts!!.toSet().forEach {
                 generateEvoleqProduct(it, project)
             }
         }
         if(extension.sumTypes != null) {
-            extension.sumTypes!!.toList().forEach {
+            extension.sumTypes!!.toSet().forEach {
                 generateSumType(it, project)
             }
         }
         if(extension.productTypes != null) {
-            extension.productTypes!!.toList().forEach {
+            extension.productTypes!!.toSet().forEach {
                 generateProductType(it, project)
             }
         }
         if(extension.dualities != null) {
-            extension.dualities!!.toList().forEach {
+            extension.dualities!!.toSet().forEach {
                 generateDuality(it, project)
             }
         }
         if(extension.productTypeArithmetics != null) {
-            extension.productTypeArithmetics!!.toList().forEach {
+            extension.productTypeArithmetics!!.toSet().forEach {
                 generateProductTypeArithmetic(it, project)
             }
         }

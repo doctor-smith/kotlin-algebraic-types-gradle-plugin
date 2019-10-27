@@ -2,6 +2,7 @@ plugins {
     maven
     `maven-publish`
     `java-gradle-plugin`
+    id("com.gradle.plugin-publish") version "0.10.0"
     `kotlin-dsl`
     java
     groovy
@@ -26,14 +27,7 @@ dependencies {
     testCompile("junit", "junit", "4.12")
 }
 
-gradlePlugin {
-    plugins {
-        create("KotlinAlgebraicTypesPlugin") {
-            id = "org.drx.kotlin-algebraic-types-plugin"
-            implementationClass = "org.drx.plugin.algebraictypes.KotlinAlgebraicTypesPlugin"
-        }
-    }
-}
+
 
 configure<JavaPluginConvention> {
     sourceSets{
@@ -73,6 +67,24 @@ tasks {
     }
 
 
+}
+
+pluginBundle {
+    website = "https://github.com/doctor-smith/kotlin-algebraic-types-plugin"
+    vcsUrl = "https://github.com/doctor-smith/kotlin-algebraic-types-plugin.git"
+    tags = listOf("kotlin", "algebraic types", "generate", "category")
+}
+
+gradlePlugin {
+    plugins {
+        create("KotlinAlgebraicTypesPlugin") {
+            id = "org.drx.kotlin-algebraic-types-plugin"
+            displayName = "Kotlin Algebraic Types Plugin"
+            description = "Generate algebraic types of arbitrary finite dimension"
+            implementationClass = "org.drx.plugin.algebraictypes.KotlinAlgebraicTypesPlugin"
+            version = Config.ProjectData.version
+        }
+    }
 }
 
 
@@ -116,7 +128,7 @@ publishing {
                 val root = asNode()
                 root.appendNode("description", "Generate Algebraic Types")
                 root.appendNode("name", Config.ProjectData.artifactId)
-                root.appendNode("url", "https://github.com/doctor-smith/evoleq.git")
+                root.appendNode("url", "https://github.com/doctor-smith/kotlin-algebraic-types-plugin.git")
                 root.children().addAll(maven.pom().dependencies)
             }
 

@@ -13,15 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.plugin.algebraictypes
+package org.drx.plugin.algebraictypes.generate
 
-import org.gradle.api.DefaultTask
+import org.drx.plugin.algebraictypes.basePath
 import org.gradle.api.Project
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.options.Option
 import java.io.File
-
+/*
 open class GenerateProductTypeArithmetic: DefaultTask() {
     @Suppress("UnstableApiUsage")
     @set:Option(option = "dimension", description = "The number of factors of the product-type to be generated")
@@ -54,7 +51,7 @@ open class GenerateProductTypeArithmetics: DefaultTask() {
 
 
 }
-
+*/
 
 
 

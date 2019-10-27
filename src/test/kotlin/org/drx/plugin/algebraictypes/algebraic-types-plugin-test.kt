@@ -15,11 +15,10 @@
  */
 package org.drx.plugin.algebraictypes
 
+import org.drx.plugin.algebraictypes.generate.license
 import org.drx.plugin.algebraictypes.task.GenerateTypes
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginConvention
-import org.gradle.api.tasks.SourceSet
-import org.gradle.kotlin.dsl.container
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.withConvention
 import org.gradle.testfixtures.ProjectBuilder

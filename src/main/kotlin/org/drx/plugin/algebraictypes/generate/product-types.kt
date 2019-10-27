@@ -13,15 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.plugin.algebraictypes
+package org.drx.plugin.algebraictypes.generate
 
-import org.gradle.api.DefaultTask
+import org.drx.plugin.algebraictypes.basePath
 import org.gradle.api.Project
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.options.Option
 import java.io.File
-import kotlin.math.max
 
 
 /**********************************************************************************************************************
@@ -29,7 +25,7 @@ import kotlin.math.max
  * Product Types
  *
  **********************************************************************************************************************/
-
+/*
 open class GenerateProductType: DefaultTask() {
     @Suppress("UnstableApiUsage")
     @set:Option(option = "dimension", description = "The number of factors of the product-type to be generated")
@@ -65,7 +61,7 @@ open class GenerateProductTypes: DefaultTask() {
         }
     }
 }
-
+*/
 fun generateProductInterface(project: Project){
 
     val dir = File("${project.projectDir}$basePath/products")
@@ -111,7 +107,7 @@ fun generateProductType(dimension: Int, project: Project) {
 
 
 fun buildProductType(dimension: Int): String {
-    var result = "data class Product$dimension<${buildGenericTypes(dimension, "F", variance= "out")}>(${buildProductTypeArguments(dimension, "val")}) : Product\n"
+    var result = "data class Product$dimension<${buildGenericTypes(dimension, "F", variance = "out")}>(${buildProductTypeArguments(dimension, "val")}) : Product\n"
     result += dist()
     result += "@Suppress(\"FunctionName\")\n"
     result += "fun <${buildGenericTypes(dimension, "F")}> Product(${buildProductTypeArguments(dimension)}) : Product$dimension<${buildGenericTypes(dimension, "F")}> = Product$dimension(${buildProductArguments(dimension)})"
