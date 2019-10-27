@@ -19,15 +19,20 @@ sealed class DimensionSelection {
     data class Single(val dimension: Int) : DimensionSelection()
     data class Range(val from: Int = 2, val to: Int) : DimensionSelection()
     data class List(val list: ArrayList<Int>) : DimensionSelection()
+    data class Complex(val list: ArrayList<DimensionSelection> = arrayListOf()) : DimensionSelection()
 }
 
-fun DimensionSelection.toList(): ArrayList<Int> = when (this) {
-    is DimensionSelection.Single -> arrayListOf(dimension)
-    is DimensionSelection.Range -> arrayListOf(*IntRange(from,to).toList().toTypedArray())
-    is DimensionSelection.List -> list
+fun DimensionSelection.toSet(): HashSet<Int> = when (this) {
+    is DimensionSelection.Single -> hashSetOf(dimension)
+    is DimensionSelection.Range -> hashSetOf(*IntRange(from,to).toList().toTypedArray())
+    is DimensionSelection.List -> list.toHashSet()
+    is DimensionSelection.Complex -> {
+        val result = hashSetOf<Int>()
+        list.forEach { result.addAll ( it.toSet() ) }
+        result
+    }
 }
 
-/* TODO integrate in plugin structure*/
 open class AlgebraicTypesExtension {
     var productTypes: DimensionSelection? = null
     var sumTypes: DimensionSelection? = null
@@ -52,26 +57,36 @@ open class DimensionSelectionExtension {
     }
 
     fun dimension(dimension: Int) {
-        if(dimensionSelection != null) {
+        if(dimensionSelection is DimensionSelection.Single) {
             throw Exception("Selection already set")
         }
-        dimensionSelection = DimensionSelection.Single(dimension)
+        if(dimensionSelection == null) {
+            dimensionSelection = DimensionSelection.Complex()
+        }
+        (dimensionSelection as DimensionSelection.Complex).list.add(DimensionSelection.Single(dimension))
     }
 
     fun list(vararg dimensions: Int) {
-        if(dimensionSelection != null) {
+        if(dimensionSelection  is DimensionSelection.Single) {
             throw Exception("Selection already set")
         }
-        dimensionSelection = DimensionSelection.List(arrayListOf(*dimensions.toTypedArray()))
+        if(dimensionSelection == null) {
+            dimensionSelection = DimensionSelection.Complex()
+        }
+        (dimensionSelection as DimensionSelection.Complex).list.add(DimensionSelection.List(arrayListOf(*dimensions.toTypedArray())))
     }
 
     fun range(from: Int, to: Int) {
-        if(dimensionSelection != null) {
+        if(dimensionSelection  is DimensionSelection.Single) {
             throw Exception("Selection already set")
         }
-        dimensionSelection = DimensionSelection.Range(from,to)
+        if(dimensionSelection == null) {
+            dimensionSelection = DimensionSelection.Complex()
+        }
+        (dimensionSelection as DimensionSelection.Complex).list.add(DimensionSelection.Range(from,to))
     }
 }
+
 open class SingleDimensionSelectionExtension {
     var dimensionSelection: DimensionSelection.Single? = null
 
