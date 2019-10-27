@@ -54,7 +54,7 @@ open class GenerateEvoleqProducts: DefaultTask() {
     fun generate() {
         val to = Integer.parseInt(to)
         val from = Integer.parseInt(from)
-        //require(to > 9)
+
         IntRange(max(2, from),to).forEach {
             generateEvoleqProduct(it, project)
         }
