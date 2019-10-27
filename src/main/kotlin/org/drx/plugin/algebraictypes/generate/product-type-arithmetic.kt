@@ -18,42 +18,6 @@ package org.drx.plugin.algebraictypes.generate
 import org.drx.plugin.algebraictypes.basePath
 import org.gradle.api.Project
 import java.io.File
-/*
-open class GenerateProductTypeArithmetic: DefaultTask() {
-    @Suppress("UnstableApiUsage")
-    @set:Option(option = "dimension", description = "The number of factors of the product-type to be generated")
-    @get:Input
-    var dimension: String = "2"
-
-    @TaskAction
-    fun generate() {
-        require(Integer.parseInt(dimension) >=2 )
-        generateProductTypeArithmetic(Integer.parseInt(dimension), project)
-    }
-
-
-}
-
-
-open class GenerateProductTypeArithmetics: DefaultTask() {
-    @Suppress("UnstableApiUsage")
-    @set:Option(option = "dimension", description = "The number of factors of the product-type to be generated")
-    @get:Input
-    var dimension: String = "2"
-
-    @TaskAction
-    fun generate() {
-        require(Integer.parseInt(dimension) >=2 )
-        IntRange(2,Integer.parseInt(dimension)).forEach {
-            generateProductTypeArithmetic(it, project)
-        }
-    }
-
-
-}
-*/
-
-
 
 fun generateProductTypeArithmetic(dimension: Int, project: Project) {
     IntRange(2, dimension).forEach { generateProductType(it, project) }

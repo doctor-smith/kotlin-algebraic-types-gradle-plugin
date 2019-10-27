@@ -20,44 +20,6 @@ import org.gradle.api.Project
 import java.io.File
 
 
-/*
-open class GenerateDuality: DefaultTask() {
-    @Suppress("UnstableApiUsage")
-    @set:Option(option = "dimension", description = "The number of factors of the product-type to be generated")
-    @get:Input
-    var dimension: String = "2"
-
-    @TaskAction
-    fun generate() {
-        generateDuality(Integer.parseInt(dimension), project)
-    }
-
-
-}
-
-open class GenerateDualities: DefaultTask() {
-    @Suppress("UnstableApiUsage")
-    @set:Option(option = "from", description = "The lower bound of the range of the product types to be generated")
-    @get:Input
-    var from: String = "2"
-
-    @set:Option(option = "to", description = "The upper bound of the range of the product types to be generated")
-    @get:Input
-    var to: String = "2"
-
-    @TaskAction
-    fun generate() {
-        val to = Integer.parseInt(to)
-        val from = Integer.parseInt(from)
-        //require(to > 9)
-        IntRange(max(2, from),to).forEach {
-            generateDuality(it, project)
-        }
-    }
-}
-*/
-
-
 fun generateDuality(dimension: Int, project: Project){
 
     generateSumType(dimension, project)

@@ -25,43 +25,7 @@ import java.io.File
  * Product Types
  *
  **********************************************************************************************************************/
-/*
-open class GenerateProductType: DefaultTask() {
-    @Suppress("UnstableApiUsage")
-    @set:Option(option = "dimension", description = "The number of factors of the product-type to be generated")
-    @get:Input
-    var dimension: String = "2"
 
-    @TaskAction
-    fun generate() {
-        generateProductType(Integer.parseInt(dimension), project)
-    }
-
-
-}
-
-
-open class GenerateProductTypes: DefaultTask() {
-    @Suppress("UnstableApiUsage")
-    @set:Option(option = "from", description = "The lower bound of the range of the product types to be generated")
-    @get:Input
-    var from: String = "2"
-
-    @set:Option(option = "to", description = "The upper bound of the range of the product types to be generated")
-    @get:Input
-    var to: String = "2"
-
-    @TaskAction
-    fun generate() {
-        val to = Integer.parseInt(to)
-        val from = Integer.parseInt(from)
-        //require(to > 9)
-        IntRange(max(2, from),to).forEach {
-            generateProductType(it, project)
-        }
-    }
-}
-*/
 fun generateProductInterface(project: Project){
 
     val dir = File("${project.projectDir}$basePath/products")

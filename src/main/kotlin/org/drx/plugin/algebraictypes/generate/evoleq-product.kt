@@ -19,45 +19,6 @@ import org.drx.plugin.algebraictypes.basePath
 import org.gradle.api.Project
 import java.io.File
 
-/*
-open class GenerateEvoleqProduct: DefaultTask() {
-    @Suppress("UnstableApiUsage")
-    @set:Option(option = "dimension", description = "The dimension")
-    @get:Input
-    var dimension: String = "2"
-
-    @TaskAction
-    fun generate() {
-        //println(license())
-        generateEvoleqProduct(Integer.parseInt(dimension), project)
-
-    }
-
-
-}
-
-
-open class GenerateEvoleqProducts: DefaultTask() {
-    @Suppress("UnstableApiUsage")
-    @set:Option(option = "from", description = "The lower bound of the range of the types to be generated")
-    @get:Input
-    var from: String = "2"
-
-    @set:Option(option = "to", description = "The upper bound of the range of the types to be generated")
-    @get:Input
-    var to: String = "2"
-
-    @TaskAction
-    fun generate() {
-        val to = Integer.parseInt(to)
-        val from = Integer.parseInt(from)
-
-        IntRange(max(2, from),to).forEach {
-            generateEvoleqProduct(it, project)
-        }
-    }
-}
-*/
 fun generateEvoleqProduct(dimension: Int, project: Project) {
     val dir = File("${project.projectDir}$basePath/evoleq/products")
     if(!dir.exists()) {
