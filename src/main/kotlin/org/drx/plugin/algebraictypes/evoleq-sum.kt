@@ -73,6 +73,9 @@ fun generateEvoleqSum(dimension: Int, project: Project) {
     evoleqProduct += "\n\npackage org.drx.generated.evoleq.sums\n\n\n"
     evoleqProduct += "import org.drx.evoleq.flow.Evolver\n"
     evoleqProduct += "import org.drx.evoleq.evolving.Evolving\n"
+    if(dimension != 2) {
+        evoleqProduct += "import org.drx.generated.products.Product2\n"
+    }
     evoleqProduct += "import org.drx.generated.products.Product$dimension\n"
     evoleqProduct += "import org.drx.generated.sums.Sum$dimension\n\n"
     evoleqProduct += dist()
@@ -97,7 +100,7 @@ fun buildSumEvolveFunction(dimension: Int): String {
     val cases1 = progression.joinToString("") { "\n    is Sum$dimension.Summand$it -> Sum$dimension.Summand$it( factor$it.evolve( sum.value ) )" }
     val cases2 = progression.joinToString("") { "\n    is Sum$dimension.Summand$it -> Sum$dimension.Summand$it( value.evolve( product.factor$it ) )" }
     val cases3 = progression.joinToString("") { "\n    is Sum$dimension.Summand$it -> value.evolve( data )" }
-    val cases4 = progression.joinToString("") { "\n    is Sum$dimension.Summand$it -> Sum$dimension.Summand$it( (factor2 as Sum3.Summand$it<$evolverTypes>).value.evolve( factor1.factor$it( data ) ) )" }
+    val cases4 = progression.joinToString("") { "\n    is Sum$dimension.Summand$it -> Sum$dimension.Summand$it( (factor2 as Sum$dimension.Summand$it<$evolverTypes>).value.evolve( factor1.factor$it( data ) ) )" }
     val comment1 = buildComment(
             "Evolve a sum type"
     )

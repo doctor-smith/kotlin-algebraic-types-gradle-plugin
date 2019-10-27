@@ -98,10 +98,11 @@ fun buildOpposeProductFunction(dimension: Int) : String {
 
     val types = buildGenericTypes(dimension,"F")
     val list = arrayListOf<String>()
+    val comment = buildComment("Turn a product of functions (F_i)->T into a", "function whose domain is a sum")
     IntRange(1,dimension).forEach {
         list.add(0, "factor$it")
     }
-    return "fun <$types ,T> Product$dimension<${buildFunctionTypes(dimension,"F")}>.oppose(): (Sum$dimension<$types>)->T = sum(${list.joinToString(",\n    ", "\n    ", "\n")})"
+    return "$comment fun <$types ,T> Product$dimension<${buildFunctionTypes(dimension,"F")}>.oppose(): (Sum$dimension<$types>)->T = sum(${list.joinToString(",\n    ", "\n    ", "\n")})"
 }
 
 fun buildOpposeSumFunction(dimension: Int) : String {
@@ -110,6 +111,7 @@ fun buildOpposeSumFunction(dimension: Int) : String {
     IntRange(1,dimension).forEach {
         list.add(0, "factor$it")
     }
+    val comment = buildComment("Turn a function (Sum<F_n,...,F_1)->T", "into a product of functions")
     return "fun <$types ,T> ((Sum$dimension<$types>)->T).oppose(): Product$dimension<${buildFunctionTypes(dimension,"F")}> = Product$dimension(${buildOpposedFunctionArgs(dimension,"F")})"
 
 }
@@ -131,7 +133,9 @@ fun buildOpposedFunctionArgs(dimension: Int, sourceType: String = "S",targetType
     return list.joinToString(",\n    ", "\n    ", "\n")
 }
 
-
+/**
+ * Measuring sums
+ */
 fun buildSumMeasureFunction(dimension: Int): String {
     val range = IntRange(1,dimension).reversed()
 
@@ -144,7 +148,9 @@ fun buildSumMeasureFunction(dimension: Int): String {
     return "${comment}fun <M, $types> Sum$dimension<$types>.measure(measure: Product$dimension<$measures>): M = when( this ) {$cases\n}"
 }
 
-
+/**
+ * Measuring simple sums
+ */
 fun buildSimpleSumMeasureFunction(dimension: Int): String {
     val range = IntRange(1,dimension).reversed()
 

@@ -72,7 +72,8 @@ fun generateEvoleqProduct(dimension: Int, project: Project) {
 
     evoleqProduct += "\n\npackage org.drx.generated.evoleq.products\n\n\n"
     evoleqProduct += "import kotlinx.coroutines.CoroutineScope\n"
-    evoleqProduct += "import kotlinx.coroutines.coroutineScope\n"
+    evoleqProduct += "import kotlinx.coroutines.launch\n"
+    evoleqProduct += "import org.drx.evoleq.dsl.parallel\n"
     evoleqProduct += "import org.drx.evoleq.flow.Evolver\n"
     evoleqProduct += "import org.drx.evoleq.evolving.Evolving\n"
     evoleqProduct += "import org.drx.evoleq.evolving.Parallel\n"
@@ -104,7 +105,7 @@ fun buildProductEvolveFunctionWithSideEffect(dimension: Int): String {
     val types = IntRange(1, dimension).reversed().joinToString(", ") { "T$it" }
     val evolverTypes = IntRange(1, dimension).reversed().joinToString(", ", "", "") { "Evolver<T$it>" }
 
-    return "${buildComment("Obtain product evolver with parallel side-effect")}@Suppress(\"FunctionName\")\nsuspend fun <$types> Product${dimension}Evolver(evolver: Product$dimension<$evolverTypes>, sideEffect: suspend CoroutineScope.()->Parallel<Unit>): Product$dimension<$evolverTypes> {\n    coroutineScope{ sideEffect().get() }\n    return evolver\n}"
+    return "${buildComment("Obtain product evolver with parallel side-effect")}@Suppress(\"FunctionName\")\nfun <$types> CoroutineScope.Product${dimension}Evolver(evolver: Product$dimension<$evolverTypes>, sideEffect: suspend CoroutineScope.()->Parallel<Unit>): Product$dimension<$evolverTypes> {\n    launch { parallel { sideEffect().get() } }\n    return evolver\n}"
 }
 
 fun buildProductGetFunction(dimension: Int): String {
