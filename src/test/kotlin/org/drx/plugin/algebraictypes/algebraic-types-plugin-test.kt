@@ -32,37 +32,23 @@ class KotlinAlgebraicTypesPluginTest {
         project.pluginManager.apply (KotlinAlgebraicTypesPlugin::class.java)
 
         assert(project.tasks.getByName("generateAlgebraicTypes") is GenerateTypes)
-
-        /*assert(project.tasks.getByName("generateSumTypes") is GenerateSumTypes)
-        assert(project.tasks.getByName("generateProductType") is GenerateProductType)
-        assert(project.tasks.getByName("generateProductTypes") is GenerateProductTypes)
-
-        assert(project.tasks.getByName("generateDuality") is GenerateDuality)
-        assert(project.tasks.getByName("generateDualities") is GenerateDualities)
-        assert(project.tasks.getByName("generateProductTypeArithmetic") is GenerateProductTypeArithmetic)
-        assert(project.tasks.getByName("generateProductTypeArithmetics") is GenerateProductTypeArithmetics)
-        assert(project.tasks.getByName("generateEvoleqProduct") is GenerateEvoleqProduct)
-        assert(project.tasks.getByName("generateEvoleqProducts") is GenerateEvoleqProducts)
-        assert(project.tasks.getByName("generateEvoleqSum") is GenerateEvoleqSum)
-        assert(project.tasks.getByName("generateEvoleqSums") is GenerateEvoleqSums)
-
-
-         */
     }
 
 
     @Test
     fun pluginAddsGeneratedSourceSetAndAddsOutputToClasspathOfMain() {
         val project: Project = ProjectBuilder.builder().build()
-        project.pluginManager.apply(KotlinAlgebraicTypesPlugin::class.java) //("org.drx.kotlin-algebraic-types-plugin")
+        project.pluginManager.apply(KotlinAlgebraicTypesPlugin::class.java)
+
+
 
         //val s = JavaPluginConvention::class.qualifiedName
         project.withConvention(JavaPluginConvention::class){
             //val s = sourceSets["generated"]
-            val m = sourceSets["main"]
+            /*
             assert(m.compileClasspath.files.map{it.absolutePath}.filter { it.endsWith("generated") }.size == 2)
             assert(m.runtimeClasspath.files.map{it.absolutePath}.filter { it.endsWith("generated") }.size == 2)
-
+            */
         }
 
 
@@ -73,9 +59,6 @@ class KotlinAlgebraicTypesPluginTest {
         val project: Project = ProjectBuilder.builder().build()
 
         project.pluginManager.apply (KotlinAlgebraicTypesPlugin::class.java)
-
-
-
     }
 
     @Test

@@ -71,6 +71,10 @@ open class GenerateTypes : DefaultTask() {
                 generateProductTypeArithmetic(it, project)
             }
         }
+
+        extension.keys.forEach {
+            generateKeyGroup(it.name!!,it.number!!, project)
+        }
     }
 
 }

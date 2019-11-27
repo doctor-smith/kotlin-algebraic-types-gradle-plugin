@@ -7,10 +7,11 @@ plugins {
     java
     groovy
     id ("com.github.hierynomus.license") version "0.15.0"
+    id ("org.jetbrains.dokka") version "0.10.0"
 }
 
-group = "org.drx"
-version = "1.0.0"
+group = Config.ProjectData.group
+version = Config.ProjectData.version
 
 repositories {
     mavenLocal()
@@ -20,7 +21,6 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    //implementation(kotlin("kotlin-gradle-plugin"))
     implementation(gradleApi())
     implementation(localGroovy())
     compile("org.codehaus.groovy:groovy-all:2.4.15")
@@ -51,19 +51,19 @@ tasks {
     val javadocJar by creating(Jar::class) {
         dependsOn(JavaPlugin.JAVADOC_TASK_NAME)
         classifier = "javadoc"
-        //from(tasks.get("javadoc"))
+        from(tasks["javadoc"])
     }
-/*
+
     val dokkaJar by creating(Jar::class) {
         group = JavaBasePlugin.DOCUMENTATION_GROUP
         description = "Assembles Kotlin docs with Dokka"
         classifier = "javadoc"
         from(tasks["dokka"])
     }
-*/
+
     artifacts {
         add("archives", sourcesJar)
-        //add("archives", dokkaJar)
+        add("archives", dokkaJar)
     }
 
 
@@ -93,7 +93,6 @@ task("writeNewPom") {
         maven.pom {
             withGroovyBuilder {
                 "project" {
-                    // setProperty("inceptionYear", "2008")
                     "licenses" {
                         "license" {
                             setProperty("name", "The Apache Software License, Version 2.0")
@@ -108,8 +107,6 @@ task("writeNewPom") {
 }
 
 publishing {
-    /*(publications) {
-        "EvoleqPublication"(MavenPublication::class) {*/
     publications {
         create<MavenPublication>("AlgebraicTypesPublication"){
             artifactId = Config.ProjectData.artifactId
@@ -126,18 +123,18 @@ publishing {
 
             pom.withXml {
                 val root = asNode()
-                root.appendNode("description", "Generate Algebraic Types")
+                root.appendNode("description", Config.ProjectData.description)
                 root.appendNode("name", Config.ProjectData.artifactId)
-                root.appendNode("url", "https://github.com/doctor-smith/kotlin-algebraic-types-plugin.git")
+                root.appendNode("url", Config.ProjectData.vcsUrl)
                 root.children().addAll(maven.pom().dependencies)
             }
 
             pom {
                 developers{
                     developer{
-                        id.set("drx")
-                        name.set("Dr. Florian Schmidt")
-                        email.set("schmidt@alpha-structure.com")
+                        id.set(Config.ProjectData.Developers.DrX.id)
+                        name.set(Config.ProjectData.Developers.DrX.name)
+                        email.set(Config.ProjectData.Developers.DrX.email)
                     }
                 }
             }

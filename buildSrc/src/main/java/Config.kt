@@ -1,16 +1,26 @@
 object Config {
 
     object ProjectData {
-        val group = "org.drx"
-        val version = "1.0.2"
-        val artifactId = "kotlin-algebraic-types-plugin"
+        const val group = "org.drx"
+        const val version = "1.0.3"
+        const val artifactId = "kotlin-algebraic-types-plugin"
+        const val description = "Generate Algebraic Types"
+
+        const val vcsUrl = "https://github.com/doctor-smith/kotlin-algebraic-types-plugin.git"
+
+        object Developers {
+            object DrX {
+                const val id = "drx"
+                const val name = "Dr. Florian Schmidt"
+                const val email = "schmidt@alpha-structure.com"
+            }
+        }
     }
 
     object Versions {
-
-        val kotlin = "1.3.50"
-        val coroutines = "1.3.1"
-        val junit = "4.12"
+        const val kotlin = "1.3.50"
+        const val coroutines = "1.3.1"
+        const val junit = "4.12"
     }
 
     object Dependencies {
