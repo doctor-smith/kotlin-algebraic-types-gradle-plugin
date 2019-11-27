@@ -185,7 +185,7 @@ fun AlgebraicTypesExtension.outputs(configuration: OutputExtension.()->Unit) {
     )
 }
 
-fun AlgebraicTypesExtension.keys(configuration: KeysExtension.()->Unit) {
+fun AlgebraicTypesExtension.keyGroups(configuration: KeysExtension.()->Unit) {
     val extension = KeysExtension()
     extension.configuration()
 
@@ -199,11 +199,6 @@ open class Keys {
 
 open class KeysExtension {
     val keys = arrayListOf<Keys>()
-    fun keyGroups(definition: Keys.()->Unit) {
-        val k = Keys()
-        k.definition()
-        keys.add(k)
-    }
 }
 
 fun KeysExtension.keyGroup(definition: Keys.()->Unit) {
