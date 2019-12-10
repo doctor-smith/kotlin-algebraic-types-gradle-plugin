@@ -73,7 +73,7 @@ open class GenerateTypes : DefaultTask() {
         }
 
         extension.keys.forEach {
-            generateKeyGroup(it.name!!,it.number!!, project)
+            generateKeyGroup1(it.name!!,it.number!!, project)
         }
     }
 

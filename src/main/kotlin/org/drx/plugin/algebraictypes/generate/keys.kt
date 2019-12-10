@@ -138,5 +138,102 @@ fun generateKeyGroup (prefix: String = "", number: Int = 0, project: Project) {
     //println("Generating $number keys")
 }
 
+fun generateKeyGroup1(prefix: String = "", number: Int = 0, project: Project) {
+    require(number > -1)
+
+    val dir = File("${project.projectDir}$basePath/keys")
+    if (!dir.exists()) {
+        dir.mkdirs()
+    }
+    var keys = license()
+    keys += "\n\npackage org.drx.generated.keys\n\n\n"
+
+    var keyClass = ""
+    var keyObject = ""
+    var getByInt = ""
+    var getByKey = ""
+    var classNamePrefix = ""
+    var keyArray: String
+    if(prefix != "") {
+        classNamePrefix = prefix.substring(0,1).toUpperCase() + prefix.substring(1)
+    }
+
+    val serializerName = "${classNamePrefix.substring(0,1).toUpperCase()}${classNamePrefix.substring(1)}KeySerializer"
+    val keyArrayName = "${classNamePrefix.substring(0,1).toLowerCase()}${classNamePrefix.substring(1)}KeyArray"
+    IntRange(0,number).forEach {
+        keyClass += "    object Key$it : ${classNamePrefix}Key()\n"
+    }
+    keyClass += "    object NoKey : ${classNamePrefix}Key()\n"
+    getByInt += "        else -> ${classNamePrefix}Key.NoKey::class\n"
+
+    keyArray = "val ${keyArrayName}: Array<KClass<out ${classNamePrefix}Key>> by lazy{ ${classNamePrefix}Key::class.sealedSubclasses.toTypedArray() }"
+
+    keyClass = "@Serializable(with = ${serializerName}::class)\nsealed class ${classNamePrefix}Key {\n$keyClass}"
+    getByInt = "\n    operator fun get(index: Int): KClass<out ${classNamePrefix}Key> = try {" +
+            "\n        require(index < N)" +
+            "\n        $keyArrayName[index]" +
+            "\n    } catch(ignored : Exception) {" +
+            "\n        ${classNamePrefix}Key.NoKey::class" +
+            "\n    }" +
+            "\n"
+    getByKey = "\n    operator fun get(key: KClass<out ${classNamePrefix}Key>): Int = when(key){" +
+            "\n        ${classNamePrefix}Key.NoKey::class -> -1" +
+            "\n        else -> try {" +
+            "\n            $keyArrayName.indexOf(key)" +
+            "\n        } catch(ignored : Exception) {" +
+            "\n            -1" +
+            "\n        }" +
+            "\n    }" +
+            "\n"
+
+    keyObject = "object ${classNamePrefix}Keys {" +
+            "\n    private val N = $keyArrayName.size" +
+            "\n$getByInt" +
+            "$getByKey}"
+
+    val instanceFunction = "fun KClass<out ${classNamePrefix}Key>.instance(): ${classNamePrefix}Key = objectInstance!!"
+
+    val classFunction = "fun ${classNamePrefix}Key.kClass(): KClass<out ${classNamePrefix}Key> = this::class"
+
+    val serializer = "class $serializerName : KSerializer<${classNamePrefix}Key> {\n" +
+            "    override fun serialize(encoder: Encoder, obj: ${classNamePrefix}Key) {\n" +
+            "        encoder.encodeString(obj::class.qualifiedName!!)\n" +
+            "    }\n" +
+            "\n" +
+            "    override val descriptor: SerialDescriptor\n" +
+            "        get() = StringDescriptor.withName(\"$serializerName\")\n" +
+            "\n" +
+            "    override fun deserialize(decoder: Decoder): ${classNamePrefix}Key {\n" +
+            "        val name = decoder.decodeString()\n" +
+            "        $keyArrayName.forEach {\n" +
+            "            if(name == it.qualifiedName) {\n" +
+            "                return it.objectInstance!!\n" +
+            "            }\n" +
+            "        }\n" +
+            "        return ${classNamePrefix}Key.NoKey\n" +
+            "    }\n" +
+            "}\n"
+
+
+    keys += "import kotlin.reflect.KClass \n" +
+            "import kotlinx.serialization.*\n" +
+            "import kotlinx.serialization.internal.StringDescriptor\n\n" +
+            "$keyClass\n\n" +
+            "$keyArray\n\n" +
+            "$keyObject\n\n" +
+            "$instanceFunction\n\n" +
+            "$classFunction\n\n" +
+            "$serializer\n"
+
+    var filenamePrefix = ""
+    if(prefix != "") {
+
+        filenamePrefix = prefix.toLowerCase()+"-"
+    }
+    val keysFile = File("${project.projectDir}$basePath/keys/${filenamePrefix}keys.kt")
+    keysFile.writeText(keys)
+    //println(keys)
+    //println("Generating $number keys")
+}
 
 
