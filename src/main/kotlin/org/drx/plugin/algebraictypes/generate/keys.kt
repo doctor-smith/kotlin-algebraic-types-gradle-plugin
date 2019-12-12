@@ -138,7 +138,7 @@ fun generateKeyGroup (prefix: String = "", number: Int = 0, project: Project) {
     //println("Generating $number keys")
 }
 
-fun generateKeyGroup1(prefix: String = "", number: Int = 0, project: Project) {
+fun generateKeyGroup1(prefix: String = "", number: Int = 0, serialization: Boolean, project: Project) {
     require(number > -1)
 
     val dir = File("${project.projectDir}$basePath/keys")
@@ -168,7 +168,7 @@ fun generateKeyGroup1(prefix: String = "", number: Int = 0, project: Project) {
 
     keyArray = "val ${keyArrayName}: Array<KClass<out ${classNamePrefix}Key>> by lazy{ ${classNamePrefix}Key::class.sealedSubclasses.toTypedArray() }"
 
-    keyClass = "@Serializable(with = ${serializerName}::class)\nsealed class ${classNamePrefix}Key {\n$keyClass}"
+    keyClass = if(serialization){"@Serializable(with = ${serializerName}::class)\n"}else{""}+"sealed class ${classNamePrefix}Key {\n$keyClass}"
     getByInt = "\n    operator fun get(index: Int): KClass<out ${classNamePrefix}Key> = try {" +
             "\n        require(index < N)" +
             "\n        $keyArrayName[index]" +
@@ -216,14 +216,15 @@ fun generateKeyGroup1(prefix: String = "", number: Int = 0, project: Project) {
 
 
     keys += "import kotlin.reflect.KClass \n" +
-            "import kotlinx.serialization.*\n" +
-            "import kotlinx.serialization.internal.StringDescriptor\n\n" +
+            if(serialization){"import kotlinx.serialization.*\n"}else{""} +
+            if(serialization){"import kotlinx.serialization.internal.StringDescriptor\n"}else{""}+
+            "\n" +
             "$keyClass\n\n" +
             "$keyArray\n\n" +
             "$keyObject\n\n" +
             "$instanceFunction\n\n" +
-            "$classFunction\n\n" +
-            "$serializer\n"
+            "$classFunction\n" +
+            if(serialization){"\n$serializer\n"}else{""}
 
     var filenamePrefix = ""
     if(prefix != "") {

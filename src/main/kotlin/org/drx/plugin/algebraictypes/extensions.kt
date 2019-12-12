@@ -15,6 +15,8 @@
  */
 package org.drx.plugin.algebraictypes
 
+import org.gradle.api.Project
+
 sealed class DimensionSelection {
     data class Single(val dimension: Int) : DimensionSelection()
     data class Range(val from: Int = 2, val to: Int) : DimensionSelection()
@@ -99,37 +101,60 @@ open class SingleDimensionSelectionExtension {
     }
 }
 
+/**
+ * Root dsl function
+ */
+fun Project.algebraicTypes(configuration: AlgebraicTypesExtension.()->Unit) {
+    (this as org.gradle.api.plugins.ExtensionAware).extensions.configure("algebraicTypes", configuration)
+}
+
+/**
+ * Products dsl
+ */
 fun AlgebraicTypesExtension.products(configuration: DimensionSelectionExtension.()->Unit) {
     val extension = DimensionSelectionExtension()
     extension.configuration()
     productTypes = extension.dimensionSelection
 }
-
+/**
+ * Sums dsl
+ */
 fun AlgebraicTypesExtension.sums(configuration: DimensionSelectionExtension.()->Unit) {
     val extension = DimensionSelectionExtension()
     extension.configuration()
     sumTypes = extension.dimensionSelection
 }
 
+/**
+ * Product-Arithmetics dsl
+ */
 fun AlgebraicTypesExtension.productArithmetics(configuration: DimensionSelectionExtension.()->Unit) {
     val extension = DimensionSelectionExtension()
     extension.configuration()
     productTypeArithmetics = extension.dimensionSelection
 }
 
+/**
+ * Evoleq Products dsl
+ */
 fun AlgebraicTypesExtension.evoleqProducts(configuration: DimensionSelectionExtension.()->Unit) {
     val extension = DimensionSelectionExtension()
     extension.configuration()
     evoleqProducts = extension.dimensionSelection
 }
 
+/**
+ * Evoleq Sums dsl
+ */
 fun AlgebraicTypesExtension.evoleqSums(configuration: DimensionSelectionExtension.()->Unit) {
     val extension = DimensionSelectionExtension()
     extension.configuration()
     evoleqSums = extension.dimensionSelection
 }
 
-
+/**
+ * Dualities dsl
+ */
 fun AlgebraicTypesExtension.dualities(configuration: DimensionSelectionExtension.()->Unit) {
     val extension = DimensionSelectionExtension()
     extension.configuration()
@@ -173,7 +198,9 @@ open class OutputExtension {
     }
 }
 
-
+/**
+ * Outputs dsl
+ */
 fun AlgebraicTypesExtension.outputs(configuration: OutputExtension.()->Unit) {
     val extension = OutputExtension()
     extension.configuration()
@@ -185,6 +212,9 @@ fun AlgebraicTypesExtension.outputs(configuration: OutputExtension.()->Unit) {
     )
 }
 
+/**
+ * KeyGroups dsl
+ */
 fun AlgebraicTypesExtension.keyGroups(configuration: KeysExtension.()->Unit) {
     val extension = KeysExtension()
     extension.configuration()
@@ -195,12 +225,15 @@ fun AlgebraicTypesExtension.keyGroups(configuration: KeysExtension.()->Unit) {
 open class Keys {
     var name: String? = null
     var number: Int? = null
+    var serialization: Boolean = false
 }
 
 open class KeysExtension {
     val keys = arrayListOf<Keys>()
 }
-
+/**
+ * KeyGroup dsl
+ */
 fun KeysExtension.keyGroup(definition: Keys.()->Unit) {
     val k = Keys()
     k.definition()
