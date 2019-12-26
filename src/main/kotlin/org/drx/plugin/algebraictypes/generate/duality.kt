@@ -30,7 +30,7 @@ fun generateDuality(dimension: Int, project: Project){
     if(!dir.exists()) {
         dir.mkdirs()
     }
-    val file = File("${project.projectDir}$basePath/duality/duality$dimension.kt")
+    val file = File("${project.projectDir}$basePath/duality/duality-$dimension.kt")
     file.writeText(content)
 }
 
