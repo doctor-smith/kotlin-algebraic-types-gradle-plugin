@@ -20,7 +20,6 @@ import org.drx.plugin.algebraictypes.generate.license
 import org.drx.plugin.algebraictypes.task.GenerateTypes
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginConvention
-import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.withConvention
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.BuildResult
@@ -54,12 +53,12 @@ class KotlinAlgebraicTypesPluginTest {
         //val s = JavaPluginConvention::class.qualifiedName
         project.withConvention(JavaPluginConvention::class){
             //val s = sourceSets["generated"]
-            /*
+
+        }
+/*
             assert(m.compileClasspath.files.map{it.absolutePath}.filter { it.endsWith("generated") }.size == 2)
             assert(m.runtimeClasspath.files.map{it.absolutePath}.filter { it.endsWith("generated") }.size == 2)
             */
-        }
-
 
     }
 
@@ -69,11 +68,27 @@ class KotlinAlgebraicTypesPluginTest {
         val projectDir = project.projectDir
 
         project.pluginManager.apply (KotlinAlgebraicTypesPlugin::class.java)
+
         project.algebraicTypes {
             products {
                 dimension(5)
             }
+
+            dataClasses {
+                dataClass {
+                    name = "Test"
+                    packageName = "org.anisat.ion"
+                    sourceFolder = "src/"
+                    parameter {
+                        name = "x"
+                        type{
+                            name = "Int"
+                        }
+                    }
+                }
+            }
         }
+
 
     }
 
@@ -86,7 +101,7 @@ class KotlinAlgebraicTypesPluginTest {
 }
 
 public class FunctionalTest {
-    @Rule @JvmField  public val testProjectDir: TemporaryFolder = TemporaryFolder()
+    @Rule @JvmField  val testProjectDir: TemporaryFolder = TemporaryFolder()
     private var settingsFile: File? = null
     private var buildFile: File? = null
 
@@ -99,15 +114,9 @@ public class FunctionalTest {
 
     @Test fun test() {
 
-        settingsFile?.writeText("rootProject.name = \"hello-world\"");
+        settingsFile?.writeText("rootProject.name = \"test-project\"");
         val buildFileContent: String =
-                "import org.drx.plugin.algebraictypes.*\n" +
-                "\n" +
-                "\n" +
-                "plugins{\n" +
-                "    id(\"org.drx.kotlin-algebraic-types-plugin\") version \"1.0.7\"\n" +
-                "}\n" +
-
+                TestConfig.BuildFile.initContentLocalRepo +
                 "algebraicTypes {\n" +
                 "    products {\n" +
                 "       dimension(5)\n" +
@@ -127,5 +136,67 @@ public class FunctionalTest {
         assert(File(testProjectDir.root,"${Config.GeneratedSources.productsFolder}/product-5.kt").exists())
         assert(File(testProjectDir.root,"${Config.GeneratedSources.sumsFolder}/sum-5.kt").exists())
         assert(File(testProjectDir.root,"${Config.GeneratedSources.dualitiesFolder}/duality-5.kt").exists())
+    }
+
+    @Test fun idSetterTest() {
+        fun <T> idSetter(): T.()->T = {this}
+        assert(idSetter<Int>()(1) == 1)
+    }
+
+    @Test fun testDataClasses() {
+
+        settingsFile?.writeText("rootProject.name = \"test-project\"")
+        val sourceFolder = "src/module/main/kotlin"
+        val packageName = "org.drx.test"
+        val packageFolder = "org/drx/test"
+        val buildFileContent: String =
+                """${TestConfig.BuildFile.initContentLocalRepo}
+                    |
+                    |algebraicTypes{
+                    |   dataClasses{
+                    |       dataClass{
+                    |           name = "TestData"
+                    |           packageName = "$packageName"
+                    |           sourceFolder = "$sourceFolder"
+                    |           parameter{
+                    |               name = "x"
+                    |               type {
+                    |                   name = "Int"
+                    |               }
+                    |           }  
+                    |           parameter{
+                    |               name = "y"
+                    |               type {
+                    |                   name = "Y"
+                    |                   isGeneric = true
+                    |               }
+                    |           } 
+                    |            parameter{
+                    |               name = "z"
+                    |               type {
+                    |                   name = "String"
+                    |               }
+                    |           }  
+                    |       }   
+                    |   }
+                    |}
+                """.trimMargin()
+
+        buildFile?.writeText(buildFileContent);
+
+        val result: BuildResult = GradleRunner . create ()
+                .withProjectDir(testProjectDir.root)
+                .withArguments(Config.Tasks.generateAlgebraicTypes)
+                .build();
+
+        assert(File(testProjectDir.root,"${Config.GeneratedSources.DataClasses.folderName}/functions.kt").exists())
+        println(File(testProjectDir.root,"${Config.GeneratedSources.DataClasses.folderName}/functions.kt").readText())
+
+        assert(File(testProjectDir.root,"${Config.GeneratedSources.productsFolder}/product-2.kt").exists())
+        assert(File(testProjectDir.root,"${Config.GeneratedSources.productsFolder}/product-3.kt").exists())
+
+
+        assert(File(testProjectDir.root,"$sourceFolder/$packageFolder/TestData.kt").exists())
+        println(File(testProjectDir.root,"$sourceFolder/$packageFolder/TestData.kt").readText())
     }
 }

@@ -20,12 +20,32 @@ object Config {
         const val baseFolder = "/src/generated/kotlin/org/drx/generated"
         const val basePackage = "org.drx.generated"
 
+        object Base {
+            const val folderName = "/src/generated/kotlin/org/drx/generated"
+            const val packageName = "org.drx.generated"
+        }
+
+        object Products {
+            const val folderName = "$baseFolder/products"
+            const val fileNamePrefix = "product"
+            const val packageName = "$basePackage.products"
+        }
+
+        object DataClasses {
+            const val folderName = "$baseFolder/lenses"
+        }
         const val productsFolder = "$baseFolder/products"
-        //const val productFilenamePrefix = "product-"
+        const val productFileNamePrefix = "product"
+
+
         const val sumsFolder = "$baseFolder/sums"
+        const val sumFileNamePrefix = "sum"
+
         const val keysFolder = "$baseFolder/keys"
         const val dualitiesFolder = "$baseFolder/duality"
+        const val dualityFileNamePrefix = "duality"
     }
+
     object Tasks {
         const val generateAlgebraicTypes = "generateAlgebraicTypes"
     }

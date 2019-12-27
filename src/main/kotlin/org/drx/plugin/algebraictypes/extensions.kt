@@ -46,6 +46,8 @@ open class AlgebraicTypesExtension {
     var outputs: Outputs = Outputs()
 
     val keys: ArrayList<Keys> = arrayListOf()
+
+    var dataClasses: DataClasses? = null
 }
 
 
@@ -238,4 +240,57 @@ fun KeysExtension.keyGroup(definition: Keys.()->Unit) {
     val k = Keys()
     k.definition()
     keys.add(k)
+}
+
+/**********************************************************************************************************************
+ *
+ * Data class Configuration
+ *
+ **********************************************************************************************************************/
+
+open class DataClasses {
+    val dataClasses : ArrayList<DataClass> = arrayListOf()
+}
+
+open class DataClass {
+    lateinit var name: String
+    var packageName: String = ""
+    var sourceFolder: String = ""
+    val parameters: ArrayList<Parameter> = arrayListOf()
+}
+
+open class Parameter {
+    lateinit var name: String
+    lateinit var type: ParameterType
+}
+
+open class ParameterType {
+    lateinit var name: String
+    var import: String = ""
+    var isGeneric: Boolean = false
+}
+
+fun AlgebraicTypesExtension.dataClasses(configuration: DataClasses.()->Unit) {
+
+    val dataClasses = DataClasses()
+    dataClasses.configuration()
+    this.dataClasses = dataClasses
+}
+
+fun DataClasses.dataClass(configuration: DataClass.()->Unit) {
+    val dataClass = DataClass()
+    dataClass.configuration()
+    dataClasses.add(dataClass)
+}
+
+fun DataClass.parameter(configuration: Parameter.() -> Unit) {
+    val parameter = Parameter()
+    parameter.configuration()
+    parameters.add(parameter)
+}
+
+fun Parameter.type(configuration: ParameterType.()->Unit) {
+    val type = ParameterType()
+    type.configuration()
+    this.type = type
 }

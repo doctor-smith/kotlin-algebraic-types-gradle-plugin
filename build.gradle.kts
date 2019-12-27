@@ -66,7 +66,9 @@ tasks {
         add("archives", dokkaJar)
     }
 
-
+    getByName("test"){
+        dependsOn(getByName("publishToMavenLocal"))
+    }
 }
 
 pluginBundle {
