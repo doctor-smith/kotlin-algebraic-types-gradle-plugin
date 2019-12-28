@@ -1,4 +1,4 @@
-[![Download](https://img.shields.io/badge/Gradle%20Plugin%20Portal-1.0.8-blue.svg)](https://plugins.gradle.org/plugin/org.drx.kotlin-algebraic-types-plugin)
+[![Download](https://img.shields.io/badge/Gradle%20Plugin%20Portal-1.0.11-blue.svg)](https://plugins.gradle.org/plugin/org.drx.kotlin-algebraic-types-plugin)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 # Algebraic Types Gradle Plugin
@@ -8,7 +8,7 @@ Generate product- and sum-types of arbitrary finite 'dimension' together with re
 Add the plugin id to the plugin-block of your build.gradle.kts file
 ```kotlin
 plugins{
-    id("org.drx.kotlin-algebraic-types-plugin") version "1.0.6"
+    id("org.drx.kotlin-algebraic-types-plugin") version "1.0.11"
 }
 
 ```
@@ -64,6 +64,28 @@ algebraicTypes{
             /* ... */
         }
     }
+    // generate data class together with a pseudo-lens-structure 
+    dataClasses {
+        dataClass{
+            name = "Foo"
+            sourceFolder = "module/src/main/kotlin"
+            packageName = "my.pack.age"
+            parameter{
+                name = "bar"
+                type {
+                    name = "MyCustomType"
+                    import = "x.y.z"
+                }           
+            }  
+            parameter{
+                name = "generic"
+                type{
+                    name = "T"
+                    isGeneric = true
+                }
+            }                
+        }
+    }
 }
 ```
 ### Notes
@@ -75,7 +97,120 @@ algebraicTypes{
       + evoleqSums
       + evoleqProducts    
   + Usage of 'evoleqSums' and 'evoleqProducts' only makes sense if you are also using [Evoleq](https://github.com/doctor-smith/evoleq) 
-  
+### Data classes extension
+Consider the example
+```kotlin
+algebraicTypes{
+    ...
+    dataClasses {
+        dataClass{
+            name = "Foo"
+            sourceFolder = "module/src/main/kotlin"
+            packageName = "my.pack.age"
+            parameter{
+                name = "bar"
+                type {
+                    name = "MyCustomType"
+                    import = "x.y.z.MyCustomType"
+                }           
+            }  
+            parameter{
+                name = "generic"
+                defaultValue = "arrayListOf()"
+                type{
+                    name = "ArrayList<T>"
+                    isGeneric = true
+                    genericIn = "T"
+                }
+            }                
+        }
+    }
+    ...
+}
+``` 
+This will generate a data class Foo
+```kotlin
+import x.y.z.MyCustomType
+
+data class Foo<T>(
+    val bar: MyCustomType,
+    val generic: ArrayList<T> = arrayListOf()
+)
+```
+together with a composable (non-generic / pseudo-) lens structure:
+```kotlin
+val foo = Foo(MyCustomType())
+
+val fooPrime = foo.set{
+    transaction{
+        bar{f()}.
+        generic{
+            fluent{ add(1) }
+        }
+    }()  
+}
+
+fun MyCustomType.f(): MyCustomType = todo
+```
+If you need to perform operations on Foo in a coroutine, i.e if the function f from above suspends, just use
+```kotlin
+suspend fun MyCustomType.f(): MyCustomType = todo
+GlobalScope.launch{
+    val fooPrime = foo.suspendSet{
+        suspendTransaction{
+            bar{f()}.
+            generic{
+                suspendFluent{ add(1) }
+            }
+        }()  
+    }
+}
+
+```
+#### Composability
+Suppose that you have generated to data classes
+```kotlin
+data class Foo(val bar: Bar = Bar())
+
+data class Bar(
+    val value1: String = "",
+    val value2: String = "",
+    val value3: String = ""
+)
+```
+Then you compose the lenses like
+```kotlin
+val foo = Foo()
+val manipulated = foo.set{
+    transaction{
+        bar{ 
+            set{
+                transaction{
+                    value1{
+                        "new value 1"
+                    }.
+                    value2{
+                        "new value 2"
+                    }.
+                    value3{
+                        "new value 3"
+                    }
+                }()
+            } 
+        }
+    }()
+}
+
+
+
+
+
+
+
+```
+
+
+
 
 ## Examples
  + [FontAwesomeFX Browser](https://bitbucket.org/dr-smith/evoleq-examples/src/master/fontawesomefx-viewer/src/main/kotlin/org/drx/evoleq/examples/fontawesomefxviewer/component/stage/main-stage.kt) (lines 86 to 120): Sophisticated usage of product-types within a process.

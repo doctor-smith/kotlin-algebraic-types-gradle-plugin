@@ -262,12 +262,14 @@ open class DataClass {
 open class Parameter {
     lateinit var name: String
     lateinit var type: ParameterType
+    var defaultValue: String? = null
 }
 
 open class ParameterType {
     lateinit var name: String
     var import: String = ""
     var isGeneric: Boolean = false
+    var genericIn: String = ""
 }
 
 fun AlgebraicTypesExtension.dataClasses(configuration: DataClasses.()->Unit) {

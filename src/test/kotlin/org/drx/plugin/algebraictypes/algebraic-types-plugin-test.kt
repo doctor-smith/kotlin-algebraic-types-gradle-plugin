@@ -166,9 +166,11 @@ public class FunctionalTest {
                     |           }  
                     |           parameter{
                     |               name = "y"
+                    |               defaultValue = "arrayListOf()"
                     |               type {
-                    |                   name = "Y"
+                    |                   name = "ArrayList<Y>"
                     |                   isGeneric = true
+                    |                   genericIn = "Y"
                     |               }
                     |           } 
                     |            parameter{

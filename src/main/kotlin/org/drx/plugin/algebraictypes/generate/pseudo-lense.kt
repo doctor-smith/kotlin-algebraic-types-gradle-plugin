@@ -30,22 +30,7 @@ fun generatePseudoLenses(dataClasses: DataClasses, project: Project) {
         dir.mkdirs()
     }
     val file = File("${project.projectDir}$basePath/lenses/functions.kt")
-    if(!file.exists()) {
-        var sum = license()
-        sum += dist()
-        sum += "package org.drx.generated.lenses"
-        sum += dist()
-        sum += buildIdSetter()
-        sum += dist()
-        sum += buildSuspendedIdSetter()
-        sum += dist()
-        sum += buildExtendedFunctionComposer()
-        sum += dist()
-        sum += buildFluentFunction()
-        sum += dist()
-
-        file.writeText(sum)
-    }
+    file.writeText(buildAuxiliaryFunctions())
 
     // generate products in all needed dimensions
     with(dataClasses.dataClasses.map {
@@ -67,7 +52,6 @@ fun generatePseudoLenses(dataClasses: DataClasses, project: Project) {
 fun generatePseudoLens(dataClass: DataClass, project: Project) {
     // build string representation and save it
     with(file(dataClass,project)){
-        //throw Exception(absolutePath)
         if(!exists()) {
             parentFile.mkdirs()
             createNewFile()
@@ -135,7 +119,8 @@ fun imports(dataClass: DataClass): String {
 fun dataClassRepresentation(dataClass: DataClass, generics: String?): String {
 
 
-    fun parameters(): String = dataClass.parameters.joinToString(",\n", "", "") { "    val ${it.name}: ${it.type.name}" }
+    fun parameters(): String = dataClass.parameters.joinToString(",\n", "", "") { "    val ${it.name}: ${it.type.name}${if(it.defaultValue == null){""}else{" = ${it.defaultValue!!}"}}" }
+
     return """
         |data class ${dataClass.name}${if(generics!=null){"<$generics>"}else{""}}(
         |${parameters()}
@@ -148,8 +133,13 @@ fun dataClassRepresentation(dataClass: DataClass, generics: String?): String {
  */
 fun generics(dataClass: DataClass): String? {
     val result = dataClass.parameters
+            .asSequence()
             .filter { it.type.isGeneric }
-            .map{it.type.name}
+            .map{when(it.type.genericIn){
+                "" -> listOf(it.type.name)
+                else -> it.type.genericIn.split(",").map{term -> term.trim()}
+            }}
+            .flatten()
             .toSet()
             .joinToString(", ")
     if(result == "") {
@@ -282,6 +272,20 @@ fun file(dataClass: DataClass, project: Project): File = when(dataClass.sourceFo
     else -> File(project.projectDir, "${dataClass.sourceFolder}/${packageName(dataClass).replace(".","/")}/${dataClass.name}.kt".replace("//","/"))
 }
 
+fun buildAuxiliaryFunctions(): String = """${license()}
+    |
+    |package org.drx.generated.lenses
+    |
+    |${buildIdSetter()}
+    |
+    |${buildSuspendedIdSetter()}
+    |
+    |${buildExtendedFunctionComposer()}
+    |
+    |${buildFluentFunction()}
+""".trimMargin()
+
+
 /**
  * Build setter: T.()->T
  */
@@ -307,7 +311,7 @@ fun buildSuspendedIdSetter(): String = "suspend fun <T> idSetterSuspended(): sus
  */
 fun buildExtendedFunctionComposer(): String = """infix fun <R,S,T> (R.()->S).then(f: S.()->T): R.()->T = {this.this@then().f()}
     |
-    |suspend infix fun <R,S,T> (suspend R.()->S).suspendThen(f: suspend  S.()->T): suspend R.()->T = {this.this@then().f()}
+    |infix fun <R,S,T> (suspend R.()->S).suspendThen(f: suspend  S.()->T): suspend R.()->T = {this.this@suspendThen().f()}
 """.trimMargin()
 
 /**
@@ -315,5 +319,5 @@ fun buildExtendedFunctionComposer(): String = """infix fun <R,S,T> (R.()->S).the
  */
 fun buildFluentFunction(): String = """fun <S,T> S.fluent(merge: (S,T)-> S = {s,_ -> s}, block: S.()->T): S = merge(this,block())
     |
-    |fun <S,T> S.suspendFluent(merge: suspend (S,T)-> S = {s,_ -> s}, block: suspend S.()->T): S = merge(this,block())
+    |suspend fun <S,T> S.suspendFluent(merge: suspend (S,T)-> S = {s,_ -> s}, block: suspend S.()->T): S = merge(this,block())
 """.trimMargin()
