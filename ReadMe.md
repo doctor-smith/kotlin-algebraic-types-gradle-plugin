@@ -139,7 +139,7 @@ data class Foo<T>(
 ```
 together with a composable (non-generic / pseudo-) lens structure:
 ```kotlin
-val foo = Foo(MyCustomType())
+val foo = Foo<Int>(MyCustomType())
 
 val fooPrime = foo.set{
     transaction{
