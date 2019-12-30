@@ -74,7 +74,7 @@ tasks {
 pluginBundle {
     website = "https://github.com/doctor-smith/kotlin-algebraic-types-plugin"
     vcsUrl = "https://github.com/doctor-smith/kotlin-algebraic-types-plugin.git"
-    tags = listOf("kotlin", "algebraic types", "generate", "category")
+    tags = listOf("kotlin", "functional", "algebraic types", "generate", "category", " lens", "prism")
 }
 
 gradlePlugin {

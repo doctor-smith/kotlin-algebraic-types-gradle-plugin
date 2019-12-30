@@ -250,19 +250,90 @@ fun KeysExtension.keyGroup(definition: Keys.()->Unit) {
 
 open class DataClasses {
     val dataClasses : ArrayList<DataClass> = arrayListOf()
+    val sealedClasses : ArrayList<SealedClass> = arrayListOf()
+    val classes : ArrayList<Class> = arrayListOf()
+    val objects : ArrayList<Object> = arrayListOf()
+    val interfaces : ArrayList<Object> = arrayListOf()
 }
 
-open class DataClass {
-    lateinit var name: String
-    var packageName: String = ""
-    var sourceFolder: String = ""
-    val parameters: ArrayList<Parameter> = arrayListOf()
+interface ClassRepresentation{
+    var name: String
+    var packageName: String
+    var sourceFolder: String
+    val parameters: ArrayList<Parameter>
+    val comment: ArrayList<String>
+    var settersPostFix: String
+}
+
+open class DataClass : ClassRepresentation {
+    override lateinit var name: String
+    override var packageName: String = ""
+    override var sourceFolder: String = ""
+    override val parameters: ArrayList<Parameter> = arrayListOf()
+    override val comment: ArrayList<String> = arrayListOf()
+    override var settersPostFix: String = ""
+}
+
+open class Object : ClassRepresentation {
+    override lateinit var name: String
+    override var packageName: String = ""
+    override var sourceFolder: String = ""
+    override val parameters: ArrayList<Parameter> = arrayListOf()
+    override val comment: ArrayList<String> = arrayListOf()
+    override var settersPostFix: String = ""
+}
+
+open class Interface : ClassRepresentation {
+    override lateinit var name: String
+    override var packageName: String = ""
+    override var sourceFolder: String = ""
+    override val parameters: ArrayList<Parameter> = arrayListOf()
+    override val comment: ArrayList<String> = arrayListOf()
+    override var settersPostFix: String = ""
+}
+
+open class Class : ClassRepresentation {
+    override lateinit var name: String
+    override var packageName: String = ""
+    override var sourceFolder: String = ""
+    override val parameters: ArrayList<Parameter> = arrayListOf()
+    override val comment: ArrayList<String> = arrayListOf()
+    override var settersPostFix: String = ""
+}
+
+open class SealedClass : ClassRepresentation {
+    override lateinit var name: String
+    override var packageName: String = ""
+    override var sourceFolder: String = ""
+    override val parameters: ArrayList<Parameter> = arrayListOf()
+    val representatives: ArrayList<SubClass> = arrayListOf()
+    override val comment: ArrayList<String> = arrayListOf()
+    override var settersPostFix: String = ""
+}
+
+open class SubClass(open val parent: ClassRepresentation) : ClassRepresentation {
+    override lateinit var name: String
+    override var packageName: String = ""
+    override var sourceFolder: String = ""
+    override val parameters: ArrayList<Parameter> = arrayListOf()
+    override val comment: ArrayList<String> = arrayListOf()
+    val overrideParameters: ArrayList<String> = arrayListOf()
+    val defaultValuesSet:HashMap<String, String> = hashMapOf()
+    override var settersPostFix: String = ""
+}
+
+open class SubObject(override val parent: ClassRepresentation) : SubClass(parent)
+open class SubDataClass(override val parent: ClassRepresentation) : SubClass(parent)
+open class SubSealedClass(override val parent: ClassRepresentation) : SubClass(parent) {
+    val representants: ArrayList<SubClass> = arrayListOf()
 }
 
 open class Parameter {
     lateinit var name: String
     lateinit var type: ParameterType
     var defaultValue: String? = null
+    val modifiers: ArrayList<String> = arrayListOf()
+    val comment: ArrayList<String> = arrayListOf()
 }
 
 open class ParameterType {
@@ -271,6 +342,18 @@ open class ParameterType {
     var isGeneric: Boolean = false
     var genericIn: String = ""
 }
+
+fun SubDataClass.toDataClass(): DataClass {
+    val dataClass = DataClass()
+    dataClass.name = name
+    dataClass.settersPostFix = settersPostFix
+    dataClass.packageName = packageName
+    dataClass.comment.addAll(comment)
+    dataClass.sourceFolder = sourceFolder
+    dataClass.parameters.addAll(parameters)
+    return dataClass
+}
+
 
 fun AlgebraicTypesExtension.dataClasses(configuration: DataClasses.()->Unit) {
 
@@ -285,11 +368,60 @@ fun DataClasses.dataClass(configuration: DataClass.()->Unit) {
     dataClasses.add(dataClass)
 }
 
+
+fun DataClasses.sealedClass(configuration: SealedClass.()->Unit) {
+    val sealedClass = SealedClass()
+    sealedClass.configuration()
+    sealedClasses.add(sealedClass)
+}
+
+fun DataClasses.clazz(configuration: Class.()->Unit) {
+    val clazz = Class()
+    clazz.configuration()
+    classes.add(clazz)
+}
+
+fun DataClasses.objekt(configuration: Object.()->Unit) {
+    val objekt = Object()
+    objekt.configuration()
+    objects.add(objekt)
+}
+
 fun DataClass.parameter(configuration: Parameter.() -> Unit) {
     val parameter = Parameter()
     parameter.configuration()
     parameters.add(parameter)
 }
+
+fun SealedClass.parameter(configuration: Parameter.() -> Unit) {
+    val parameter = Parameter()
+    parameter.configuration()
+    parameters.add(parameter)
+}
+
+fun SubClass.parameter(configuration: Parameter.() -> Unit) {
+    val parameter = Parameter()
+    parameter.configuration()
+    parameters.add(parameter)
+}
+
+fun SealedClass.representative(configuration: SubClass.() -> Unit) = subClass( configuration )
+
+fun SealedClass.dataRepresentative(configuration: SubDataClass.() -> Unit) = representatives.add(subDataClass( configuration ))
+
+fun ClassRepresentation.subDataClass(configuration: SubDataClass.()->Unit): SubDataClass {
+    require(this !is DataClass)
+    val subClass = SubDataClass(this)
+    subClass.configuration()
+    return subClass
+}
+
+fun ClassRepresentation.subClass(configuration: SubClass.()->Unit) {
+    require(this !is DataClass)
+    val subClass = SubClass(this)
+    subClass.configuration()
+}
+
 
 fun Parameter.type(configuration: ParameterType.()->Unit) {
     val type = ParameterType()

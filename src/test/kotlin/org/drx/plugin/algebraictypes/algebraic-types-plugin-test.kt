@@ -143,7 +143,7 @@ public class FunctionalTest {
         assert(idSetter<Int>()(1) == 1)
     }
 
-    @Test fun testDataClasses() {
+    @Test fun testDataClassGeneration() {
 
         settingsFile?.writeText("rootProject.name = \"test-project\"")
         val sourceFolder = "src/module/main/kotlin"
@@ -197,6 +197,87 @@ public class FunctionalTest {
         assert(File(testProjectDir.root,"${Config.GeneratedSources.productsFolder}/product-2.kt").exists())
         assert(File(testProjectDir.root,"${Config.GeneratedSources.productsFolder}/product-3.kt").exists())
 
+
+        assert(File(testProjectDir.root,"$sourceFolder/$packageFolder/TestData.kt").exists())
+        println(File(testProjectDir.root,"$sourceFolder/$packageFolder/TestData.kt").readText())
+    }
+
+
+    @Test fun sealedClassGeneration() {
+        settingsFile?.writeText("rootProject.name = \"test-project\"")
+        val sourceFolder = "src/module/main/kotlin"
+        val packageName = "org.drx.test"
+        val packageFolder = "org/drx/test"
+        val buildFileContent: String =
+                """${TestConfig.BuildFile.initContentLocalRepo}
+                    |
+                    |algebraicTypes{
+                    |   dataClasses{
+                    |      sealedClass {
+                    |         name = "TestData"
+                    |         packageName = "$packageName"
+                    |         sourceFolder = "$sourceFolder" 
+                    |         dataRepresentative {
+                    |               name = "One"
+                    |               parameter {
+                    |                   name = "x"
+                    |                   type {
+                    |                       name = "Int"
+                    |                   }
+                    |               }
+                    |         }
+                    |         dataRepresentative {
+                    |               name = "Two"
+                    |               parameter {
+                    |                   name = "x"
+                    |                   type {
+                    |                       name = "Int"
+                    |                   }
+                    |               }
+                    |               parameter {
+                    |                   name = "y"
+                    |                   type {
+                    |                       name = "String"
+                    |                   }
+                    |               }
+                    |               parameter {
+                    |                   name = "z"
+                    |                   type {
+                    |                       name = "Boolean"
+                    |                   }
+                    |               }
+                    |         }
+                    |         dataRepresentative {
+                    |               name = "Three"
+                    |               parameter {
+                    |                   name = "z"
+                    |                   type {
+                    |                       name = "Boolean"
+                    |                   }
+                    |               }
+                    |         }
+                    |      }   
+                    |   }
+                    |}
+                """.trimMargin()
+
+        buildFile?.writeText(buildFileContent);
+
+        val result: BuildResult = GradleRunner . create ()
+                .withProjectDir(testProjectDir.root)
+                .withArguments(Config.Tasks.generateAlgebraicTypes)
+                .build();
+
+        // We expect files:
+        // sum-3
+        // product-1,product-2,product-3
+        // file containing the generated prism
+
+        assert(File(testProjectDir.root,"${Config.GeneratedSources.Sums.folderName}/sum-3.kt").exists())
+
+        assert(File(testProjectDir.root,"${Config.GeneratedSources.productsFolder}/product-1.kt").exists())
+        assert(File(testProjectDir.root,"${Config.GeneratedSources.productsFolder}/product-2.kt").exists())
+        assert(File(testProjectDir.root,"${Config.GeneratedSources.productsFolder}/product-3.kt").exists())
 
         assert(File(testProjectDir.root,"$sourceFolder/$packageFolder/TestData.kt").exists())
         println(File(testProjectDir.root,"$sourceFolder/$packageFolder/TestData.kt").readText())

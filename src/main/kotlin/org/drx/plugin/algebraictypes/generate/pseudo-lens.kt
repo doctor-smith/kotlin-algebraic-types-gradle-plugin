@@ -74,29 +74,32 @@ fun buildDataClass(dataClass: DataClass): String {
         |
         |${imports(dataClass)}
         |
+        |
+        |${buildComment(dataClass.comment)}
         |${dataClassRepresentation(dataClass, generics)}
+        |
+        |
+        |${buildSectionComment("Pseudo lens structure of ${dataClass.name}")}
         |
         |${setter(dataClass, generics)}
         |
-        |${parameterSetters(dataClass,generics)}
-        |
         |${transaction(dataClass,dataClass.parameters.size, generics)}
+        |
+        |${parameterSetters(dataClass,generics)} 
+        |
+        |
+        |${buildSectionComment("Suspended pseudo lens structure of ${dataClass.name}")}
         |
         |${setterSuspended(dataClass, generics)}
         |
-        |${parameterSettersSuspended(dataClass,generics)}
-        |
         |${transactionSuspended(dataClass,dataClass.parameters.size, generics)}
+        |
+        |${parameterSettersSuspended(dataClass,generics)}
+        
     """.trimMargin()
 }
 
-/**
- * Compute the package name
- */
-fun packageName(dataClass: DataClass) :String = when(dataClass.packageName) {
-    "" -> "org.drx.generated.lenses"
-    else -> dataClass.packageName
-}
+
 
 /**
  * Data class may depend on types which need to be imported.
@@ -153,9 +156,9 @@ fun generics(dataClass: DataClass): String? {
  * Data.set(setter: Data.()->Product<..., T_i.()->T_i ,...>): Data
  */
 fun setter(dataClass: DataClass, generics: String?): String {
-    val genericsOnClass = if(generics == null){""}else{"<$generics>"}
+    val genericsOnClass = if(generics == null){""}else{"<$generics> "}
 
-    return """fun $genericsOnClass ${dataClass.name}$genericsOnClass.set(transaction: ${dataClass.name}$genericsOnClass.()->${productSetterType(dataClass,generics)}): ${dataClass.name}$genericsOnClass = with(transaction()) {
+    return """${buildComment("Setter function")}fun $genericsOnClass${dataClass.name}$genericsOnClass.set${if(dataClass.settersPostFix != ""){dataClass.settersPostFix}else{""}}(transaction: ${dataClass.name}$genericsOnClass.()->${productSetterType(dataClass,generics)}): ${dataClass.name}$genericsOnClass = with(transaction()) {
         |   ${dataClass.name}(
         |${dataClass.parameters.mapIndexed{index, parameter -> "        ${parameter.name}.factor${index+1}()" }.joinToString(",\n") }      
         |   )   
@@ -168,9 +171,9 @@ fun setter(dataClass: DataClass, generics: String?): String {
  * suspend Data.set(setter: suspend Data.()->Product<..., suspend T_i.()->T_i ,...>): Data
  */
 fun setterSuspended(dataClass: DataClass, generics: String?): String {
-    val genericsOnClass = if(generics == null){""}else{"<$generics>"}
+    val genericsOnClass = if(generics == null){""}else{"<$generics> "}
 
-    return """suspend fun $genericsOnClass ${dataClass.name}$genericsOnClass.suspendSet(transaction: suspend ${dataClass.name}$genericsOnClass.()->${productSetterTypeSuspended(dataClass,generics)}): ${dataClass.name}$genericsOnClass = with(transaction()) {
+    return """${buildComment("Suspended setter function")}suspend fun $genericsOnClass${dataClass.name}$genericsOnClass.suspendSet${if(dataClass.settersPostFix != ""){dataClass.settersPostFix}else{""}}(transaction: suspend ${dataClass.name}$genericsOnClass.()->${productSetterTypeSuspended(dataClass,generics)}): ${dataClass.name}$genericsOnClass = with(transaction()) {
         |   ${dataClass.name}(
         |${dataClass.parameters.mapIndexed{index, parameter -> "        ${parameter.name}.factor${index+1}()" }.joinToString(",\n") }      
         |   )   
@@ -183,9 +186,10 @@ fun setterSuspended(dataClass: DataClass, generics: String?): String {
  *
  */
 fun transaction(dataClass: DataClass, dimension: Int, generics: String?): String {
-    val genericsOnClass = if(generics == null){""}else{"<$generics>"}
-    return """fun $genericsOnClass ${dataClass.name}$genericsOnClass.transaction(transaction: Product2<${dataClass.name}$genericsOnClass,${productSetterType(dataClass,generics)}>.()->Product2<${dataClass.name}$genericsOnClass,${productSetterType(dataClass,generics)}>): ${dataClass.name}$genericsOnClass.()->${productSetterType(dataClass,generics)} 
-        |    = {Product2(this@transaction, Product$dimension(${dataClass.parameters.reversed().joinToString(", ") { "idSetter<${it.type.name}>()" }})).transaction().factor1}
+    val genericsOnClass = if(generics == null){""}else{"<$generics> "}
+    val postFix  = if(dataClass.settersPostFix != ""){dataClass.settersPostFix}else{""}
+    return """${buildComment("Transaction function")}fun $genericsOnClass${dataClass.name}$genericsOnClass.transaction${postFix}(transaction: Product2<${dataClass.name}$genericsOnClass,${productSetterType(dataClass,generics)}>.()->Product2<${dataClass.name}$genericsOnClass,${productSetterType(dataClass,generics)}>): ${dataClass.name}$genericsOnClass.()->${productSetterType(dataClass,generics)} 
+        |    = {Product2(this@transaction${postFix}, Product$dimension(${dataClass.parameters.reversed().joinToString(", ") { "idSetter<${it.type.name}>()" }})).transaction().factor1}
     """.trimMargin()
 }
 
@@ -193,9 +197,10 @@ fun transaction(dataClass: DataClass, dimension: Int, generics: String?): String
  * Build the suspended transaction function
  */
 fun transactionSuspended(dataClass: DataClass, dimension: Int, generics: String?): String {
-    val genericsOnClass = if(generics == null){""}else{"<$generics>"}
-    return """suspend fun $genericsOnClass ${dataClass.name}$genericsOnClass.suspendTransaction(transaction: suspend Product2<${dataClass.name}$genericsOnClass,${productSetterTypeSuspended(dataClass,generics)}>.()->Product2<${dataClass.name}$genericsOnClass,${productSetterTypeSuspended(dataClass,generics)}>): suspend ${dataClass.name}$genericsOnClass.()->${productSetterTypeSuspended(dataClass,generics)} 
-        |    = {Product2(this@suspendTransaction, Product$dimension(${dataClass.parameters.reversed().joinToString(", ") { "idSetterSuspended<${it.type.name}>()" }})).transaction().factor1}
+    val genericsOnClass = if(generics == null){""}else{"<$generics> "}
+    val postFix  = if(dataClass.settersPostFix != ""){dataClass.settersPostFix}else{""}
+    return """${buildComment("Suspended transaction function")}suspend fun $genericsOnClass${dataClass.name}$genericsOnClass.suspendTransaction${postFix}(transaction: suspend Product2<${dataClass.name}$genericsOnClass,${productSetterTypeSuspended(dataClass,generics)}>.()->Product2<${dataClass.name}$genericsOnClass,${productSetterTypeSuspended(dataClass,generics)}>): suspend ${dataClass.name}$genericsOnClass.()->${productSetterTypeSuspended(dataClass,generics)} 
+        |    = {Product2(this@suspendTransaction${postFix}, Product$dimension(${dataClass.parameters.reversed().joinToString(", ") { "idSetterSuspended<${it.type.name}>()" }})).transaction().factor1}
     """.trimMargin()
 }
 
@@ -203,14 +208,16 @@ fun transactionSuspended(dataClass: DataClass, dimension: Int, generics: String?
  * Build parameter setters: One parameter setter for each parameter of the data class
  */
 fun parameterSetters(dataClass: DataClass, generics: String?): String {
-    return dataClass.parameters.mapIndexed{index,parameter -> parameterSetter(parameter.name,parameter.type.name,index,dataClass,dataClass.parameters.size,generics)}.joinToString("\n\n")
+    val postFix  = if(dataClass.settersPostFix != ""){dataClass.settersPostFix}else{""}
+    return dataClass.parameters.mapIndexed{index,parameter -> parameterSetter(parameter.name+postFix,parameter.type.name,index,dataClass,dataClass.parameters.size,generics)}.joinToString("\n\n")
 }
 
 /**
  * Build suspended parameter setters: One suspended parameter setter for each parameter of the data class
  */
 fun parameterSettersSuspended(dataClass: DataClass, generics: String?): String {
-    return dataClass.parameters.mapIndexed{index,parameter -> parameterSetterSuspended(parameter.name,parameter.type.name,index,dataClass,dataClass.parameters.size,generics)}.joinToString("\n\n")
+    val postFix  = if(dataClass.settersPostFix != ""){dataClass.settersPostFix}else{""}
+    return dataClass.parameters.mapIndexed{index,parameter -> parameterSetterSuspended(parameter.name+postFix,parameter.type.name,index,dataClass,dataClass.parameters.size,generics)}.joinToString("\n\n")
 }
 
 /**
@@ -218,8 +225,8 @@ fun parameterSettersSuspended(dataClass: DataClass, generics: String?): String {
  * Product2<Data, Product<...,T_i.()->T_i,...>>.param(setter: T_i.()->T_i): Product2<Data, Product<...,T_i.()->T_i,...>>
  */
 fun parameterSetter(parameterName: String,parameterType: String, parameterIndex: Int,dataClass: DataClass, dimension: Int, generics: String?) : String {
-    val genericsOnClass = if(generics == null){""}else{"<$generics>"}
-    return """fun $genericsOnClass Product2<${dataClass.name}$genericsOnClass, ${productSetterType(dataClass,generics)}>.$parameterName(setter: ${setter(parameterType)}): Product2<${dataClass.name}$genericsOnClass, ${productSetterType(dataClass,generics)}> = 
+    val genericsOnClass = if(generics == null){""}else{"<$generics> "}
+    return """${buildComment("Parameter setter function for parameter '${parameterName}'")}fun ${genericsOnClass}Product2<${dataClass.name}$genericsOnClass, ${productSetterType(dataClass,generics)}>.$parameterName(setter: ${setter(parameterType)}): Product2<${dataClass.name}$genericsOnClass, ${productSetterType(dataClass,generics)}> = 
         |    Product2(this@${parameterName}.factor2,this@$parameterName.factor1.map${parameterIndex +1} {oldSetter -> oldSetter then setter})
     """.trimMargin()
 }
@@ -229,8 +236,8 @@ fun parameterSetter(parameterName: String,parameterType: String, parameterIndex:
  * suspend Product2<Data, Product<..., suspend T_i.()->T_i,...>>.param(setter: suspend T_i.()->T_i): Product2<Data, Product<..., suspend T_i.()->T_i,...>>
  */
 fun parameterSetterSuspended(parameterName: String,parameterType: String, parameterIndex: Int,dataClass: DataClass, dimension: Int, generics: String?) : String {
-    val genericsOnClass = if(generics == null){""}else{"<$generics>"}
-    return """suspend fun $genericsOnClass Product2<${dataClass.name}$genericsOnClass, ${productSetterTypeSuspended(dataClass,generics)}>.${parameterName}(setter: ${setterSuspended(parameterType)}): Product2<${dataClass.name}$genericsOnClass, ${productSetterTypeSuspended(dataClass,generics)}> = 
+    val genericsOnClass = if(generics == null){""}else{"<$generics> "}
+    return """${buildComment("Suspended parameter setter function for parameter '${parameterName}'")}suspend fun ${genericsOnClass}Product2<${dataClass.name}$genericsOnClass, ${productSetterTypeSuspended(dataClass,generics)}>.${parameterName}(setter: ${setterSuspended(parameterType)}): Product2<${dataClass.name}$genericsOnClass, ${productSetterTypeSuspended(dataClass,generics)}> = 
         |    Product2(this@${parameterName}.factor2,this@${parameterName}.factor1.suspendFluent({_,t->t}){ map${parameterIndex +1} {oldSetter -> oldSetter suspendThen setter}})
     """.trimMargin()
 }
@@ -263,6 +270,14 @@ fun productSetterTypeSuspended(dataClass: DataClass, generics: String?): String 
  * Auxiliary functions
  *
  **********************************************************************************************************************/
+
+/**
+ * Compute the package name
+ */
+fun packageName(dataClass: DataClass) :String = when(dataClass.packageName) {
+    "" -> "org.drx.generated.lenses"
+    else -> dataClass.packageName
+}
 
 /**
  *

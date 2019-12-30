@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.plugin.algebraictypes
+package org.drx.plugin.algebraictypes.generate
 
-import org.drx.plugin.algebraictypes.generate.buildComment
-import org.junit.Test
+import org.drx.plugin.algebraictypes.ClassRepresentation
+import org.drx.plugin.algebraictypes.Parameter
 
-class AuxTest {
-
-    @Test fun commentTest() {
-        println(buildComment("This", "is", "a", "fucking", "comment"))
-    }
-
-
+fun imports(clazz: ClassRepresentation, collected: HashSet<String> = hashSetOf()): HashSet<String> {
+    collected.addAll(clazz.parameters.map { it.type.import })
+    return collected
 }
+
+fun Parameter.modifiers(): String = modifiers.joinToString(" ") { it }

@@ -31,8 +31,19 @@ object Config {
             const val packageName = "$basePackage.products"
         }
 
+        object Sums {
+            const val folderName = "$baseFolder/sums"
+            const val fileNamePrefix = "sum"
+            const val packageName = "$basePackage.sums"
+        }
+
+
         object DataClasses {
             const val folderName = "$baseFolder/lenses"
+        }
+
+        object SealedClasses {
+            const val folderName = "$baseFolder/prisms"
         }
         const val productsFolder = "$baseFolder/products"
         const val productFileNamePrefix = "product"

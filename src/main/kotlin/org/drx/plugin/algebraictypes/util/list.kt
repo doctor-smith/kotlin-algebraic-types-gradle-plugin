@@ -13,16 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.plugin.algebraictypes
+package org.drx.plugin.algebraictypes.util
 
-import org.drx.plugin.algebraictypes.generate.buildComment
-import org.junit.Test
-
-class AuxTest {
-
-    @Test fun commentTest() {
-        println(buildComment("This", "is", "a", "fucking", "comment"))
-    }
-
-
-}
+fun <T> ArrayList<T>.addAll(vararg elements: T) = addAll(arrayListOf(*elements))

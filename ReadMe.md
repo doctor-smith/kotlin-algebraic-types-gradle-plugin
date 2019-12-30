@@ -1,14 +1,14 @@
-[![Download](https://img.shields.io/badge/Gradle%20Plugin%20Portal-1.0.11-blue.svg)](https://plugins.gradle.org/plugin/org.drx.kotlin-algebraic-types-plugin)
+[![Download](https://img.shields.io/badge/Gradle%20Plugin%20Portal-1.0.12-blue.svg)](https://plugins.gradle.org/plugin/org.drx.kotlin-algebraic-types-plugin)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 # Algebraic Types Gradle Plugin
-Generate product- and sum-types of arbitrary finite 'dimension' together with related functorial maps.
+Generate product- and sum-types of arbitrary finite 'dimension' together with related functorial maps, generate composable non-generic / pseudo lenses and prisms.
 
 ## Add the plugin to your project
 Add the plugin id to the plugin-block of your build.gradle.kts file
 ```kotlin
 plugins{
-    id("org.drx.kotlin-algebraic-types-plugin") version "1.0.11"
+    id("org.drx.kotlin-algebraic-types-plugin") version "1.0.12"
 }
 
 ```
@@ -97,8 +97,10 @@ algebraicTypes{
       + evoleqSums
       + evoleqProducts    
   + Usage of 'evoleqSums' and 'evoleqProducts' only makes sense if you are also using [Evoleq](https://github.com/doctor-smith/evoleq) 
+  + Using the serialization option requires the [kotlin-serialization](https://github.com/Kotlin/kotlinx.serialization) library
 ### Data classes extension
-Consider the example
+Consider the 
+#### Example
 ```kotlin
 algebraicTypes{
     ...
@@ -200,16 +202,42 @@ val manipulated = foo.set{
         }
     }()
 }
-
-
-
-
-
-
-
+```
+### Sealed classes
+#### Example
+```kotlin
+algebraicTypes{
+    dataClasees{
+        sealedClass{
+            name = "Sealed"
+            dataRepesentative{
+                name = "One"   
+                parameters {
+                    /* ... */          
+                }
+            }
+            dataRepesentative{
+                nane = "Two"
+                parameters{
+                    /* --- */
+                }
+            }
+        }
+    }
+}
 ```
 
 
+
+## Planned:
+  + [ ] Automated kotlin-serialization for generated data classes and sealed classes 
+  + [ ] Support generic types on sealed classes and their representatives
+  + [ ] Support generation of nested sealed classes / prisms (using sealed classes / prisms only as parameters is possible)
+  + [ ] Support other representatives than data classes
+  + [ ] Generate 'simple' lenses and prisms, like 
+  
+        fun Data.param(set: Type.()->Type): Data = copy(param = param.set())
+  + [ ] Getters for prisms
 
 
 ## Examples

@@ -78,6 +78,7 @@ open class GenerateTypes : DefaultTask() {
 
         if(extension.dataClasses != null) {
             generatePseudoLenses(extension.dataClasses!!, project)
+            generatePseudoPrisms(extension.dataClasses!!, project)
         }
     }
 

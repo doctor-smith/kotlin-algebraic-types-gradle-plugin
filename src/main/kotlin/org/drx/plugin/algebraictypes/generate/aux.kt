@@ -57,3 +57,32 @@ public fun buildIdLambda(type: String) = "{ ${type.toLowerCase()} : ${type.toUpp
 fun buildComment(vararg lines: String): String {
     return lines.joinToString("\n * ", "/**\n * ", "\n */\n") { it }
 }
+
+fun buildComment(lines: List<String>, offset : String = "", lineBreak: Unit? = Unit): String {
+    return if(lines.isNotEmpty()) {
+        lines.joinToString("\n$offset * ", "$offset/**\n$offset * ", "\n$offset */${if(lineBreak!=null){"\n"}else{""}}") { it }
+    } else {
+        ""
+    }
+}
+
+
+fun buildSectionComment(vararg lines: String): String {
+
+    val list = arrayListOf("",*lines,"")
+    return list.joinToString("\n * ", "/${Defaults.starLine}\n * ", "\n ${Defaults.starLine}/\n") { it }
+
+}
+
+fun buildParaGraphComment(vararg lines: String): String {
+
+    val list = arrayListOf(*lines,Defaults.equalSignLine)
+    return list.joinToString("\n * ", "/**\n * ", "\n */\n") { it }
+
+}
+
+object Defaults {
+    const val offset = "    "
+    const val starLine = "**********************************************************************************************************************"
+    const val equalSignLine = "===================================================================================================================="
+}
