@@ -30,7 +30,7 @@ fun generatePseudoPrisms(dataClasses: DataClasses, project: Project) {
         dir.mkdirs()
     }
     val file = File("${project.projectDir}$basePath/prisms/functions.kt")
-    file.writeText(buildAuxiliaryFunctions())
+    file.writeText(buildAuxiliaryPrismFunctions())
 
     // generate sums and products in all needed dimensions
     // sums
@@ -488,3 +488,17 @@ fun parameters(sealedClass: SubSealedClass,offset: String): List<String> = seale
         "${offset}val ${it.name}: ${it.type.name}"
     }
 }
+
+
+fun buildAuxiliaryPrismFunctions(): String = """${license()}
+    |
+    |package org.drx.generated.prisms
+    |
+    |${buildIdSetter()}
+    |
+    |${buildSuspendedIdSetter()}
+    |
+    |${buildExtendedFunctionComposer()}
+    |
+    |${buildFluentFunction()}
+""".trimMargin()

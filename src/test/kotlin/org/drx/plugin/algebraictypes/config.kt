@@ -16,7 +16,7 @@
 package org.drx.plugin.algebraictypes
 
 object TestConfig {
-    const val version = "1.0.12"
+    const val version = "1.0.13"
     const val group = "org.drx"
     const val pluginName = "kotlin-algebraic-types-plugin"
     object BuildFile {
