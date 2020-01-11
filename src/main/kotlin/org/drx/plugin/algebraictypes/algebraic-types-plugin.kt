@@ -15,6 +15,7 @@
  */
 package org.drx.plugin.algebraictypes
 
+import org.drx.plugin.algebraictypes.extension.*
 import org.drx.plugin.algebraictypes.task.GenerateTypes
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -25,7 +26,8 @@ import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.kotlin.dsl.*
 import java.io.File
 
-val basePath= "/src/generated/kotlin/org/drx/generated"
+// TODO move to config file
+const val basePath= "/src/generated/kotlin/org/drx/generated"
 
 
 

@@ -16,6 +16,7 @@
 package org.drx.plugin.algebraictypes
 
 import org.drx.plugin.algebraictypes.config.Config
+import org.drx.plugin.algebraictypes.extension.*
 import org.drx.plugin.algebraictypes.generate.license
 import org.drx.plugin.algebraictypes.task.GenerateTypes
 import org.gradle.api.Project

@@ -13,16 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.plugin.algebraictypes
+package org.drx.plugin.algebraictypes.util
 
-import org.drx.plugin.algebraictypes.generate.products.buildProductOperator
-import org.junit.Test
+fun String.repeatString(times: Int): String = IntRange(1,times).joinToString(""){ this }
 
-class ProductTypeArithmeticTest {
-
-    @Test fun buildProductOperatorTest() {
-        val product = buildProductOperator(7, 6)
-        println(product)
-    }
-
-}

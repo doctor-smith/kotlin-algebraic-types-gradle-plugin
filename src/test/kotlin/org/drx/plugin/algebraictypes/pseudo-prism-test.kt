@@ -15,7 +15,11 @@
  */
 package org.drx.plugin.algebraictypes
 
-import org.drx.plugin.algebraictypes.generate.*
+import org.drx.plugin.algebraictypes.extension.SealedClass
+import org.drx.plugin.algebraictypes.extension.dataRepresentative
+import org.drx.plugin.algebraictypes.extension.parameter
+import org.drx.plugin.algebraictypes.extension.type
+import org.drx.plugin.algebraictypes.generate.optics.buildSealedClassFileContent
 import org.drx.plugin.algebraictypes.util.addAll
 import org.junit.Test
 
@@ -34,21 +38,21 @@ class PseudoPrismTest {
             name = "param1"
             type {
                 name = "T1"
-                import = "org.lib.T1"
+                packageName = "org.lib.T1"
             }
         }
         sealedClass.parameter {
             name = "param2"
             type {
                 name = "T2"
-                import = "org.lib.T2"
+                packageName = "org.lib.T2"
             }
         }
         sealedClass.parameter {
             name = "param3"
             type {
                 name = "T3"
-                import = "org.lib.T3"
+                packageName = "org.lib.T3"
             }
         }
         sealedClass.dataRepresentative {
@@ -119,7 +123,7 @@ class PseudoPrismTest {
                 name = "param4"
                 type {
                     name = "T4"
-                    import = "org.lib.T4"
+                    packageName = "org.lib.T4"
                 }
             }
         }

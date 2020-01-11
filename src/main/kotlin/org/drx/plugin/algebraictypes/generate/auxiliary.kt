@@ -15,6 +15,7 @@
  */
 package org.drx.plugin.algebraictypes.generate
 
+import org.drx.plugin.algebraictypes.config.Config
 import java.io.File
 
 /**********************************************************************************************************************
@@ -26,7 +27,7 @@ class Marker{
     companion object obj {}
 }
 
-public fun license(): String {
+fun license(): String {
     val obj = object{}
     //println(Marker.obj::class.java.getResource("."))
     val content = File("src/main/resources/org/drx/plugin/algebraictypes/LICENSE")
@@ -34,15 +35,29 @@ public fun license(): String {
     return "/**\n * $license\n */"
 }
 
-public fun dist() = "\n\n"
+fun usesPlugin(): String = """
+    |// This file has been generated using the kotlin-algebraic-types-plugin
+""".trimMargin()
 
-public fun buildGenericTypes(dimension: Int, type: String, from: Int = 1, variance: String? = null): String{
+fun dist() = "\n\n"
+
+/**
+ * Generic Types
+ * ====================================================================================================================
+ */
+/**
+ *
+ */
+fun buildGenericTypes(dimension: Int, type: String, from: Int = 1, variance: String? = null): String{
     val list = arrayListOf<String>()
     IntRange(from,dimension).forEach { list.add(0,"${if(variance != null){"$variance "}else{""}}$type$it") }
     return list.joinToString ( ", " )
 }
 
-public fun buildGenericTypes(dimension: Int, type: String, index: Int, typeAtIndex: String, variance: String? = null): String{
+/**
+ *
+ */
+fun buildGenericTypes(dimension: Int, type: String, index: Int, typeAtIndex: String, variance: String? = null): String{
     var result = ""
     val list = arrayListOf<String>()
     IntRange(1,dimension).forEach {
@@ -52,7 +67,12 @@ public fun buildGenericTypes(dimension: Int, type: String, index: Int, typeAtInd
     return list.joinToString ( ", " )
 }
 
-public fun buildIdLambda(type: String) = "{ ${type.toLowerCase()} : ${type.toUpperCase()} -> ${type.toLowerCase()} }"
+fun buildIdLambda(type: String) = "{ ${type.toLowerCase()} : ${type.toUpperCase()} -> ${type.toLowerCase()} }"
+
+/**
+ * Comments
+ * ====================================================================================================================
+ */
 
 fun buildComment(vararg lines: String): String {
     return lines.joinToString("\n * ", "/**\n * ", "\n */\n") { it }
@@ -70,19 +90,13 @@ fun buildComment(lines: List<String>, offset : String = "", lineBreak: Unit? = U
 fun buildSectionComment(vararg lines: String): String {
 
     val list = arrayListOf("",*lines,"")
-    return list.joinToString("\n * ", "/${Defaults.starLine}\n * ", "\n ${Defaults.starLine}/\n") { it }
+    return list.joinToString("\n * ", "/${Config.Defaults.starLine}\n * ", "\n ${Config.Defaults.starLine}/\n") { it }
 
 }
 
 fun buildParaGraphComment(vararg lines: String): String {
 
-    val list = arrayListOf(*lines,Defaults.equalSignLine)
+    val list = arrayListOf(*lines, Config.Defaults.equalSignLine)
     return list.joinToString("\n * ", "/**\n * ", "\n */\n") { it }
 
-}
-
-object Defaults {
-    const val offset = "    "
-    const val starLine = "**********************************************************************************************************************"
-    const val equalSignLine = "===================================================================================================================="
 }

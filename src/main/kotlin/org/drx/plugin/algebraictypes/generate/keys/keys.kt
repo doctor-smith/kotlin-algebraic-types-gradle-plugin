@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.plugin.algebraictypes.generate
+package org.drx.plugin.algebraictypes.generate.keys
 
 /**
  * Copyright (c) 2018-2019 Dr. Florian Schmidt
@@ -32,6 +32,7 @@ package org.drx.plugin.algebraictypes.generate
  */
 
 import org.drx.plugin.algebraictypes.basePath
+import org.drx.plugin.algebraictypes.generate.license
 import org.gradle.api.Project
 import java.io.File
 

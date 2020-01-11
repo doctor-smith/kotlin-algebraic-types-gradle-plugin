@@ -60,4 +60,20 @@ object Config {
     object Tasks {
         const val generateAlgebraicTypes = "generateAlgebraicTypes"
     }
+
+    object Serialization {
+        val imports = arrayListOf(
+            "kotlinx.serialization.*",
+            "kotlinx.serialization.internal.StringDescriptor",
+            "kotlinx.serialization.modules.SerialModule",
+            "kotlinx.serialization.modules.SerializersModule",
+            "kotlinx.serialization.modules.plus"
+        )
+    }
+
+    object Defaults {
+        const val offset = "    "
+        const val starLine = "**********************************************************************************************************************"
+        const val equalSignLine = "===================================================================================================================="
+    }
 }

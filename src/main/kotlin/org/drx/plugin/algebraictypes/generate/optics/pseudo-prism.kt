@@ -13,10 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.plugin.algebraictypes.generate
+package org.drx.plugin.algebraictypes.generate.optics
 
 import org.drx.plugin.algebraictypes.*
+import org.drx.plugin.algebraictypes.config.Config
+import org.drx.plugin.algebraictypes.config.Config.Defaults as Defaults
+import org.drx.plugin.algebraictypes.extension.*
+import org.drx.plugin.algebraictypes.generate.buildComment
+import org.drx.plugin.algebraictypes.generate.buildParaGraphComment
+import org.drx.plugin.algebraictypes.generate.buildSectionComment
+import org.drx.plugin.algebraictypes.generate.license
+import org.drx.plugin.algebraictypes.generate.products.generateProductType
+import org.drx.plugin.algebraictypes.generate.serialization.buildSerialModuleName
+import org.drx.plugin.algebraictypes.generate.serialization.serialModule
+import org.drx.plugin.algebraictypes.generate.sums.generateSumType
 import org.gradle.api.Project
+import org.drx.plugin.algebraictypes.util.repeatString
 import java.io.File
 
 
@@ -39,7 +51,7 @@ fun generatePseudoPrisms(dataClasses: DataClasses, project: Project) {
     }.toHashSet()){
         //add(2)
         forEach {
-            generateSumType(it,project)
+            generateSumType(it, project)
         }
     }
 
@@ -49,13 +61,15 @@ fun generatePseudoPrisms(dataClasses: DataClasses, project: Project) {
     }.flatten().toHashSet()){
         add(2)
         forEach {
-            generateProductType(it,project)
+            generateProductType(it, project)
         }
     }
 
+    // build dependency
+
     // generate prisms
     dataClasses.sealedClasses.forEach {
-        generatePseudoPrism(it,project)
+        generatePseudoPrism(it, project)
     }
 }
 
@@ -66,7 +80,7 @@ fun generatePseudoPrisms(dataClasses: DataClasses, project: Project) {
  */
 fun generatePseudoPrism(sealedClass: SealedClass, project: Project) {
     // build string representation and save it
-    with(file(sealedClass,project)){
+    with(file(sealedClass, project)){
         if(!exists()) {
             parentFile.mkdirs()
             createNewFile()
@@ -87,13 +101,43 @@ fun imports(dataClass: SealedClass): String {
             "org.drx.generated.products.*",
             "org.drx.generated.sums.*"
     )
-    imports.addAll(dataClass.parameters.map{it.type.import})
-    dataClass.representatives.forEach {
-        it.parameters.forEach {
-            imports.add(it.type.import)
+    if(dataClass.serializable) {
+        imports.addAll( Config.Serialization.imports )
+    }
+    imports.addAll(dataClass.parameters.map{
+        with(hashSetOf<String>()){
+            add(it.type.packageName + "." + it.type.name)
+
+            // serailization
+            if(it.type.serializable && dataClass.serializable) {
+                add(it.type.packageName + "." + buildSerialModuleName(it.type.name))
+            }
+            it.type.dependencies.forEach {dependency ->
+                add(dependency.packageName + "." + dependency.name)
+                if(!it.type.serializable && dataClass.serializable && dependency.serializable) {
+                    add(dependency.packageName + "." + buildSerialModuleName(dependency.name))
+                }
+            }
+            this
+        }
+    }.flatten())
+    dataClass.representatives.forEach {representative ->
+        representative.parameters.forEach {
+            imports.add(it.type.packageName + "." + it.type.name)
+
+            // serialization
+            if(it.type.serializable && dataClass.serializable) {
+                imports.add(it.type.packageName + "." + buildSerialModuleName(it.type.name))
+            }
+            it.type.dependencies.forEach {dependency ->
+                imports.add(dependency.packageName + "." + dependency.name)
+                if(!it.type.serializable && dataClass.serializable && dependency.serializable) {
+                    imports.add(dependency.packageName + "." + buildSerialModuleName(dependency.name))
+                }
+            }
         }
     }
-    return imports.filter{it != ""}.map{"import $it"}.sortedWith(Comparator<String> { o1, o2 -> o1.compareTo(o2) })
+    return imports.filter{it != "" && !it.startsWith(".")}.map{"import $it"}.sortedWith(Comparator<String> { o1, o2 -> o1.compareTo(o2) })
             .joinToString("\n")
 }
 
@@ -105,7 +149,7 @@ fun buildSealedClassFileContent(sealedClass: SealedClass): String {
         |${imports(sealedClass)}
         |
         |${classRepresentation((sealedClass))}
-        |
+        |${if(sealedClass.serializable){"\n${serialModule(sealedClass)}"}else{""}}
         |${prism(sealedClass)}
         |
         |${subClassLenses(sealedClass)}
@@ -120,9 +164,11 @@ fun buildSealedClassFileContent(sealedClass: SealedClass): String {
 
 
 fun classRepresentation(sealedClass: SealedClass, offset: String = ""): String {
+    val generics = classGenerics(generics(sealedClass))
     return """
-        |${buildComment(sealedClass.comment, offset)}${offset}sealed class ${sealedClass.name}${if(sealedClass.parameters.isNotEmpty()){parameters(sealedClass,offset + Defaults.offset).joinToString(",\n"," (\n","$offset) {")}else{" {"}}
-        |${subClassRepresentations(sealedClass,offset + Defaults.offset)}   
+        |${buildComment(sealedClass.comment, offset)}${offset}${if(sealedClass.serializable){"@Serializable\n$offset"}else{""}}sealed class ${sealedClass.name}${generics}${if(sealedClass.parameters.isNotEmpty()){
+        parameters(sealedClass, offset + Defaults.offset).joinToString(",\n"," (\n","$offset) {")}else{" {"}}
+        |${subClassRepresentations(sealedClass, offset + Defaults.offset)}   
         |${offset}}
     """.trimMargin()
 }
@@ -130,7 +176,7 @@ fun classRepresentation(sealedClass: SealedClass, offset: String = ""): String {
 fun subClassRepresentations(sealedClass: SealedClass, offset: String = ""): String {
 
     return """ 
-        |${sealedClass.representatives.joinToString("\n\n") { subClassRepresentation(it,offset) }}
+        |${sealedClass.representatives.joinToString("\n\n") { subClassRepresentation(it, offset) }}
     """.trimMargin()
 }
 fun subClassRepresentation(subClass: SubClass, offset: String = ""): String = when(subClass){
@@ -141,13 +187,15 @@ fun subClassRepresentation(subClass: SubClass, offset: String = ""): String = wh
 }
 
 fun subClassRepresentation(subClass: SubDataClass, offset: String = ""): String {
-
+    val generics = classGenerics(generics(subClass))
+    // TODO compute generics
+    val parentalGenerics = classGenerics(generics(subClass.parent))
     return """
-        |${buildComment(subClass.comment, offset)}${offset}data class ${subClass.name}(
+        |${buildComment(subClass.comment, offset)}${offset}${if(subClass.parent.serializable){"@Serializable\n$offset"}else{""}}data class ${subClass.name}$generics(
         |${subClass.parameters.joinToString( ",\n"+ offset + Defaults.offset, offset + Defaults.offset){ 
             "${if(subClass.overrideParameters.contains(it.name)){"override "}else{""}}val ${it.name} : ${it.type.name}${if(it.defaultValue != null){" = ${it.defaultValue}"}else{""}}"
         }}
-        |${offset}): ${subClass.parent.name}${if(subClass.parent.parameters.isNotEmpty()){"(\n"+subClass.parent.parameters.joinToString(",\n"+ offset + Defaults.offset, offset + Defaults.offset, "\n${offset})") { if(subClass.defaultValuesSet[it.name] != null ){subClass.defaultValuesSet[it.name]!!} else {it.name} } }else{"()"}}
+        |${offset}): ${subClass.parent.name}$parentalGenerics${if(subClass.parent.parameters.isNotEmpty()){"(\n"+subClass.parent.parameters.joinToString(",\n"+ offset + Defaults.offset, offset + Defaults.offset, "\n${offset})") { if(subClass.defaultValuesSet[it.name] != null ){subClass.defaultValuesSet[it.name]!!} else {it.name} } }else{"()"}}
     """.trimMargin()
 }
 fun subClassRepresentation(subClass: SubObject, offset: String = ""): String = TODO()
@@ -172,11 +220,11 @@ fun prism(sealedClass: SealedClass): String {
         |
         |
         |${buildParaGraphComment("Suspended prism structure of ${sealedClass.name}")}
-        |${prismSetter(sealedClass,true)}
+        |${prismSetter(sealedClass, true)}
         |
-        |${prismTransaction(sealedClass,true)}
+        |${prismTransaction(sealedClass, true)}
         |
-        |${prismParameterSetters(sealedClass,true)}
+        |${prismParameterSetters(sealedClass, true)}
     """.trimMargin()
 }
 
@@ -186,11 +234,15 @@ fun prism(sealedClass: SealedClass): String {
  */
 
 fun prismSetter(sealedClass: SealedClass, suspended: Boolean = false): String {
+
+    val funGenerics = prismSetterFunctionGenerics(sealedClass)
+    val classGenerics = classGenerics(generics(sealedClass))
+
     return """
-        |${buildComment(listOf("Prism setter function"),"",null)}
-        |${suspended(suspended)}fun ${sealedClass.name}.${suspended(suspended,"Set","set")}(transaction: ${prismSetterType(sealedClass, suspended)}): ${sealedClass.name} = with(transaction()) {
+        |${buildComment(listOf("Prism setter function"), "", null)}
+        |${suspended(suspended)}fun $funGenerics${sealedClass.name}$classGenerics.${suspended(suspended, "Set", "set")}(transaction: ${prismSetterType(sealedClass, suspended)}): ${sealedClass.name}$classGenerics = with(transaction()) {
         |${Defaults.offset} when(this) {
-        |${prismSetterCases(sealedClass,suspended)}
+        |${prismSetterCases(sealedClass, suspended)}
         |${Defaults.offset}}
         |}
     """.trimMargin()
@@ -198,29 +250,38 @@ fun prismSetter(sealedClass: SealedClass, suspended: Boolean = false): String {
 
 fun prismSetterCases(sealedClass: SealedClass, suspended: Boolean = false): String {
     val dimension = sealedClass.representatives.size
+
     return """
-        |${sealedClass.representatives.mapIndexed{index,it ->  prismSetterCase(it as SubDataClass, index +1, dimension, suspended) }.joinToString("\n")}
+        |${sealedClass.representatives.mapIndexed{index,it -> prismSetterCase(it as SubDataClass, index + 1, dimension, suspended) }.joinToString("\n")}
     """.trimMargin()
 }
-fun prismSetterCase(representative: SubDataClass,index: Int,dimension: Int, suspended: Boolean = false): String {
+fun prismSetterCase(representative: SubDataClass, index: Int, dimension: Int, suspended: Boolean = false): String {
     val offset = Defaults.offset
 
     fun constructorParameters(clazz: SubDataClass): String {
         return if(clazz.parameters.isEmpty()) {
             ""
         } else {
-            val innerOffset = offset.repeat(4)
+            val innerOffset = offset.repeatString(4)
             clazz.parameters.mapIndexed{
-                i: Int, parameter: Parameter -> "${innerOffset}${parameter.name}.factor${i + 1}()"
-            }.joinToString(",\n","\n","\n${offset.repeat(3)}")
+                i: Int, parameter: Parameter -> "${innerOffset}${if(parameter.type.isGeneric){"(${parameter.name} as ${parameter.type.name})"}else{parameter.name}}.factor${i + 1}()"
+            }.joinToString(",\n","\n","\n${offset.repeatString(3)}")
         }
     }
 
+    fun generics(representation: ClassRepresentation): String {
+        val gen = listGenerics(representative).joinToString(", ", "<", ">") { "*" }
+        return if(gen == "<>"){
+            ""
+        } else {
+            gen
+        }
+    }
     return """
-        |${offset.repeat(2) }is Sum${dimension}.Summand${index} -> with( value ) { when( this@${suspended(suspended,"Set","set")} ) {
-        |${offset.repeat(3) }is ${representative.parent.name}.${representative.name} -> ${representative.parent.name}.${representative.name}(${constructorParameters(representative)}) 
-        |${offset.repeat(3) }else -> this@${suspended(suspended,"Set","set")}
-        |${offset.repeat(2)}} }
+        |${offset.repeatString(2) }is Sum${dimension}.Summand${index} -> with( value ) { when( this@${suspended(suspended, "Set", "set")} ) {
+        |${offset.repeatString(3) }is ${representative.parent.name}.${representative.name}${generics(representative)} -> ${representative.parent.name}.${representative.name}(${constructorParameters(representative)}) 
+        |${offset.repeatString(3) }else -> this@${suspended(suspended, "Set", "set")}
+        |${offset.repeatString(2)}} }
     """.trimMargin()
 }
 
@@ -234,15 +295,15 @@ fun prismSetterCase(representative: SubDataClass,index: Int,dimension: Int, susp
 
 fun prismTransaction(sealedClass: SealedClass, suspended: Boolean = false): String {
     val offset = Defaults.offset
+    val funGenerics = prismTransactionFunctionGenerics(sealedClass)
+    val classGenerics = classGenerics(generics(sealedClass))
+
     return """
-        ||${buildComment(listOf("Prism transaction function"),"",null)}
-        |${suspended(suspended)}fun ${sealedClass.name}.${suspended(suspended,"Transaction", "transaction")}(transaction: ${prismTransactionArgumentType(sealedClass, suspended)}): ${prismSetterType(sealedClass, suspended)} = {
-        |${offset}Product2( 
-        |${offset.repeat(2)}this@${suspended(suspended,"Transaction","transaction")}, 
-        |${offset.repeat(2)}when( this@${suspended(suspended,"Transaction","transaction")} ) {
+        ||${buildComment(listOf("Prism transaction function"), "", null)}
+        |${suspended(suspended)}fun $funGenerics${sealedClass.name}$classGenerics.${suspended(suspended, "Transaction", "transaction")}(transaction: ${prismTransactionArgumentType(sealedClass, suspended)}): ${prismSetterType(sealedClass, suspended)} = { 
+        |${offset.repeatString(1)}when( this@${suspended(suspended, "Transaction", "transaction")} ) {
         |${prismTransactionCases(sealedClass, suspended)}
-        |${offset.repeat(2)}} 
-        |$offset).transaction().factor1
+        |${offset.repeatString(1)}}.transaction()
         |}
     """.trimMargin()
 }
@@ -250,7 +311,7 @@ fun prismTransaction(sealedClass: SealedClass, suspended: Boolean = false): Stri
 fun prismTransactionCases(sealedClass: SealedClass, suspended: Boolean = false): String {
     val dimension = sealedClass.representatives.size
     return """
-        |${sealedClass.representatives.mapIndexed{index, representative -> prismTransactionCase(representative, index+1,suspended)}.joinToString("\n")}
+        |${sealedClass.representatives.mapIndexed{index, representative -> prismTransactionCase(representative, index + 1, suspended) }.joinToString("\n")}
     """.trimMargin()
 }
 
@@ -258,7 +319,17 @@ fun prismTransactionCase(representative: SubClass, index:Int, suspended: Boolean
     val offset = Defaults.offset
     val productDimension = representative.parameters.size
     val idSetter = "${if(suspended){"idSetterSuspended"}else{"idSetter"}}()"
-    return "${offset.repeat(3)}is ${representative.parent.name}.${representative.name} -> ${prismSummandType(representative.parent as SealedClass,index,suspended)}(Product$productDimension(${IntRange(1,productDimension).joinToString(", ") { idSetter }}))"
+
+    fun generics(representation: ClassRepresentation): String {
+        val gen = listGenerics(representative).joinToString(", ", "<", ">") { "*" }
+        return if(gen == "<>"){
+            ""
+        } else {
+            gen
+        }
+    }
+
+    return "${offset.repeatString(3)}is ${representative.parent.name}.${representative.name}${generics(representative)} -> ${prismSummandType(representative.parent as SealedClass, index, suspended)}(Product$productDimension(${IntRange(1,productDimension).joinToString(", ") { idSetter }}))"
 }
 
 
@@ -274,14 +345,18 @@ fun prismParameterSetters(sealedClass: SealedClass, suspended: Boolean = false):
     """.trimMargin()
 }
 
+
 fun sharedPrismParameterSetter(sealedClass: SealedClass, sharedPrismParameter: SharedPrismParameter, suspended: Boolean = false): String {
     val type = prismParameterSetterType(sealedClass, suspended)
     val offset = Defaults.offset
+    val funGenerics = prismParameterSetterFunctionGenerics(sealedClass)
+    val classGenerics = classGenerics(generics(sealedClass))
+
     return """
-        |${buildComment(listOf("Shared prism parameter setter function for","parameter '${sharedPrismParameter.name}'"),"",null)}
-        |${suspended(suspended)}fun ${type}.${sharedPrismParameter.name}(setter: ${suspended(suspended)}${setter(sharedPrismParameter.type)}): $type =
-        |${offset}when( val summand = this.factor1 ) {
-        |${sharedPrismParameterSetterCases(sealedClass,sharedPrismParameter.occurrences, suspended)}
+        |${buildComment(listOf("Shared prism parameter setter function for", "parameter '${sharedPrismParameter.name}'"), "", null)}
+        |${suspended(suspended)}fun $funGenerics${type}.${sharedPrismParameter.name}(setter: ${suspended(suspended)}${setter(sharedPrismParameter.type)}): $type =
+        |${offset}when( val summand = this ) {
+        |${sharedPrismParameterSetterCases(sealedClass, sharedPrismParameter.occurrences, suspended)}
         |${offset}}
         |
         """.trimMargin()
@@ -292,7 +367,7 @@ fun sharedPrismParameterSetterCases(sealedClass: SealedClass, occurrences: Array
     val offset = Defaults.offset
     return """
         |${occurrences.joinToString("\n") { sharedPrismParameterSetterCase(it, dimension, suspended) }}
-        |${offset.repeat(2)}else -> this
+        |${offset.repeatString(2)}else -> this
     """.trimMargin()
 }
 
@@ -300,10 +375,10 @@ fun sharedPrismParameterSetterCase(occurrence: PrismParameterOccurrence, dimensi
     val offset = Defaults.offset
     return when(suspended) {
         false -> """
-                    |${offset.repeat(2)}is Sum${dimension}.Summand${occurrence.clazzIndex + 1} -> Product2(this.factor2, Sum${dimension}.Summand${occurrence.clazzIndex + 1}(summand.value.map${occurrence.parameterIndex + 1} {oldSetter -> oldSetter then setter}))
+                    |${offset.repeatString(2)}is Sum${dimension}.Summand${occurrence.clazzIndex + 1} -> Sum${dimension}.Summand${occurrence.clazzIndex + 1}(summand.value.map${occurrence.parameterIndex + 1} {oldSetter -> oldSetter then setter})
                 """.trimMargin()
         true -> """
-                    |${offset.repeat(2)}is Sum${dimension}.Summand${occurrence.clazzIndex + 1} -> Product2(this.factor2, Sum${dimension}.Summand${occurrence.clazzIndex + 1}(summand.value.suspendFluent({_,t->t}){ map${occurrence.parameterIndex + 1} {oldSetter -> oldSetter suspendThen setter} }))
+                    |${offset.repeatString(2)}is Sum${dimension}.Summand${occurrence.clazzIndex + 1} -> Sum${dimension}.Summand${occurrence.clazzIndex + 1}(summand.value.suspendFluent({_,t->t}){ map${occurrence.parameterIndex + 1} {oldSetter -> oldSetter suspendThen setter} })
                 
                 """.trimMargin()
     }
@@ -337,35 +412,36 @@ fun prismSummandType(sealedClass: SealedClass, index: Int, suspended: Boolean = 
     }}>"
 }
 
-fun prismSetterType(sealedClass: SealedClass, suspended: Boolean = false): String =
-        "${suspended(suspended)}${sealedClass.name}.()->${prismSumType(sealedClass, suspended)}"
+fun prismSetterType(sealedClass: SealedClass, suspended: Boolean = false): String {
+    val classGenerics = classGenerics(generics(sealedClass))
+    return "${suspended(suspended)}${sealedClass.name}${classGenerics}.()->${prismSumType(sealedClass, suspended)}"
+}
 
 
 fun prismTransactionArgumentType(sealedClass: SealedClass, suspended: Boolean = false): String =
-        with(prismParameterSetterType(sealedClass,suspended)){
+        with(prismParameterSetterType(sealedClass, suspended)){
             "${suspended(suspended)}$this.()->$this"
         }
 
 fun prismParameterSetterType(sealedClass: SealedClass, suspended: Boolean = false): String {
-    return "Product2<${sealedClass.name}, ${prismSumType(sealedClass,suspended)}>"
+    return "${prismSumType(sealedClass, suspended)}"
 }
 
 fun collectSharedPrismParameters(sealedClass: SealedClass): ArrayList<SharedPrismParameter> =
     sealedClass.representatives.mapIndexed {
         clazzIndex,representative -> representative.parameters.mapIndexed{index, it ->
-            PrismParameter(it.name, it.type.name,representative.name,clazzIndex, index)
+        PrismParameter(it.name, it.type.name, representative.name, clazzIndex, index)
         }
     }.flatten().fold(arrayListOf()){
         list: ArrayList<SharedPrismParameter>, parameter ->
             val foundParameter = list.find { it.name == parameter.name && it.type == parameter.type }
             if(foundParameter==null) {
-                val newParameter = SharedPrismParameter(parameter.name,parameter.type)
-                newParameter.occurrences.add(PrismParameterOccurrence(parameter.clazz,parameter.clazzIndex,parameter.parameterIndex))
+                val newParameter = SharedPrismParameter(parameter.name, parameter.type)
+                newParameter.occurrences.add(PrismParameterOccurrence(parameter.clazz, parameter.clazzIndex, parameter.parameterIndex))
                 list.add(newParameter)
             } else {
-                foundParameter.occurrences.add(PrismParameterOccurrence(parameter.clazz,parameter.clazzIndex,parameter.parameterIndex))
+                foundParameter.occurrences.add(PrismParameterOccurrence(parameter.clazz, parameter.clazzIndex, parameter.parameterIndex))
             }
-
         list
     }
 
@@ -381,10 +457,10 @@ fun subClassLenses(sealedClass: SealedClass): String{
 
     return """
         |${buildSectionComment("Lens structures of the representatives")}
-        |${sealedClass.representatives.joinToString("\n\n\n") { subClassLens(it as SubDataClass ,sealedClass.name) }}
+        |${sealedClass.representatives.joinToString("\n\n\n") { subClassLens(it as SubDataClass, sealedClass.name) }}
     """.trimMargin()
 }
-fun subClassLens(subDataClass:  SubDataClass, parentClassName: String): String {
+fun subClassLens(subDataClass: SubDataClass, parentClassName: String): String {
     val dataClass = DataClass()
     dataClass.name = "$parentClassName.${subDataClass.name}"
     dataClass.settersPostFix = "_${subDataClass.name}"
@@ -395,16 +471,16 @@ fun subClassLens(subDataClass:  SubDataClass, parentClassName: String): String {
         |${buildParaGraphComment("Lens structure of ${dataClass.name}")}
         |${setter(dataClass, generics)}
         |
-        |${transaction(dataClass,dataClass.parameters.size, generics)}
+        |${transaction(dataClass, dataClass.parameters.size, generics)}
         |
-        |${parameterSetters(dataClass,generics)}
+        |${parameterSetters(dataClass, generics)}
         |
         |${buildParaGraphComment("Suspended lens structure of ${dataClass.name}")}
         |${setterSuspended(dataClass, generics)}
         |
-        |${transactionSuspended(dataClass,dataClass.parameters.size, generics)}
+        |${transactionSuspended(dataClass, dataClass.parameters.size, generics)}
         |
-        |${parameterSettersSuspended(dataClass,generics)}
+        |${parameterSettersSuspended(dataClass, generics)}
         |
     """.trimMargin()
 }
@@ -455,6 +531,45 @@ fun packageName(sealedClass: SealedClass) :String = when(sealedClass.packageName
     else -> sealedClass.packageName
 }
 
+fun prismSetterFunctionGenerics(sealedClass: SealedClass): String {
+    val set = listGenerics(sealedClass)
+    sealedClass.representatives.forEach {
+        set.addAll(listGenerics(it))
+    }
+    return if(set.isEmpty()) {
+        ""
+    } else {
+        set.joinToString(", ","<","> ") { it }
+    }
+}
+
+
+fun prismTransactionFunctionGenerics(sealedClass: SealedClass): String {
+    val set = listGenerics(sealedClass)
+    sealedClass.representatives.forEach {
+        set.addAll(listGenerics(it))
+    }
+    return if(set.isEmpty()) {
+        ""
+    } else {
+        set.joinToString(", ","<","> ") { it }
+    }
+}
+
+fun prismParameterSetterFunctionGenerics(sealedClass: SealedClass): String {
+    val set = listGenerics(sealedClass)
+    sealedClass.representatives.forEach {
+        set.addAll(listGenerics(it))
+    }
+    return if(set.isEmpty()) {
+        ""
+    } else {
+        set.joinToString(", ","<","> ") { it }
+    }
+}
+
+
+
 /**
  *
  */
@@ -467,12 +582,12 @@ fun SealedClass.overriddenParameters(): Set<String> = representatives.map {
     it.overrideParameters
 }.flatten().toSet()
 
-fun SubSealedClass.overriddenParameters(): Set<String> = representants.map {
+fun SubSealedClass.overriddenParameters(): Set<String> = representatives.map {
     it.overrideParameters
 }.flatten().toSet()
 
 
-fun parameters(sealedClass: SealedClass,offset: String): List<String> = sealedClass.parameters.map{
+fun parameters(sealedClass: SealedClass, offset: String): List<String> = sealedClass.parameters.map{
     val overridden = sealedClass.overriddenParameters()
     if(overridden.contains(it.name)){
         "${offset}open val ${it.name}: ${it.type.name}"
@@ -480,7 +595,7 @@ fun parameters(sealedClass: SealedClass,offset: String): List<String> = sealedCl
         "${offset}val ${it.name}: ${it.type.name}"
     }
 }
-fun parameters(sealedClass: SubSealedClass,offset: String): List<String> = sealedClass.parameters.map{
+fun parameters(sealedClass: SubSealedClass, offset: String): List<String> = sealedClass.parameters.map{
     val overridden = sealedClass.overriddenParameters()
     if(overridden.contains(it.name)){
         "${offset}open val ${it.name}: ${it.type.name}"
@@ -488,6 +603,7 @@ fun parameters(sealedClass: SubSealedClass,offset: String): List<String> = seale
         "${offset}val ${it.name}: ${it.type.name}"
     }
 }
+
 
 
 fun buildAuxiliaryPrismFunctions(): String = """${license()}

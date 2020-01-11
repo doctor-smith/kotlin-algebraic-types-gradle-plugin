@@ -15,10 +15,10 @@
  */
 package org.drx.plugin.algebraictypes
 
-import org.drx.plugin.algebraictypes.generate.buildOpposeProductFunction
-import org.drx.plugin.algebraictypes.generate.buildOpposeSumFunction
-import org.drx.plugin.algebraictypes.generate.buildSimpleSumMeasureFunction
-import org.drx.plugin.algebraictypes.generate.buildSumMeasureFunction
+import org.drx.plugin.algebraictypes.generate.duality.buildOpposeProductFunction
+import org.drx.plugin.algebraictypes.generate.duality.buildOpposeSumFunction
+import org.drx.plugin.algebraictypes.generate.duality.buildSimpleSumMeasureFunction
+import org.drx.plugin.algebraictypes.generate.duality.buildSumMeasureFunction
 import org.junit.Test
 
 class DualityTest {

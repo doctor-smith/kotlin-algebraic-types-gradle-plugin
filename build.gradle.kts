@@ -20,9 +20,11 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
-    implementation(gradleApi())
-    implementation(localGroovy())
+    implementation( Config.Dependencies.kotlinStandardLibrary )
+    implementation( Config.Dependencies.coroutines )
+    implementation( gradleApi() )
+    implementation( localGroovy() )
+    implementation( Config.Dependencies.evoleq )
     compile("org.codehaus.groovy:groovy-all:2.4.15")
     testCompile("junit", "junit", "4.12")
 }
@@ -51,14 +53,14 @@ tasks {
     val javadocJar by creating(Jar::class) {
         dependsOn(JavaPlugin.JAVADOC_TASK_NAME)
         classifier = "javadoc"
-        from(tasks["javadoc"])
+        from(getByName("javadoc"))//tasks["javadoc"])
     }
 
     val dokkaJar by creating(Jar::class) {
         group = JavaBasePlugin.DOCUMENTATION_GROUP
         description = "Assembles Kotlin docs with Dokka"
         classifier = "javadoc"
-        from(tasks["dokka"])
+        from((getByName("dokka")))//tasks["dokka"])
     }
 
     artifacts {

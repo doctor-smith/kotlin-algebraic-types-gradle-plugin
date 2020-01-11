@@ -16,7 +16,7 @@
 package org.drx.plugin.algebraictypes
 
 object TestConfig {
-    const val version = "1.0.13"
+    const val version = "1.0.14"
     const val group = "org.drx"
     const val pluginName = "kotlin-algebraic-types-plugin"
     object BuildFile {
@@ -28,7 +28,7 @@ object TestConfig {
                 "    id(\"org.drx.kotlin-algebraic-types-plugin\") version \"$version\"\n" +
                 "}\n"
 
-        val initContentLocalRepo = """import org.drx.plugin.algebraictypes.*
+        val initContentLocalRepo = """import org.drx.plugin.algebraictypes.extension.*
             |
             |
             |buildscript {

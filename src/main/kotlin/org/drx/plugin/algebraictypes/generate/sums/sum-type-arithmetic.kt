@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package org.drx.plugin.algebraictypes.generate
+package org.drx.plugin.algebraictypes.generate.sums
+
+import org.drx.plugin.algebraictypes.generate.buildGenericTypes
 
 
 // One can add (SumX)->T + (SumY)->T = (Sum(X+Y))->T bby first opposing the summands one by one,

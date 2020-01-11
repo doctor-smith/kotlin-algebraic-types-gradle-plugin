@@ -15,7 +15,7 @@
  */
 package org.drx.plugin.algebraictypes
 
-import org.drx.plugin.algebraictypes.generate.buildSumOperator
+import org.drx.plugin.algebraictypes.generate.sums.buildSumOperator
 import org.junit.Test
 
 class SumTypeArithmeticTest {

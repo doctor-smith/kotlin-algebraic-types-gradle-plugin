@@ -13,9 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.plugin.algebraictypes.generate
+package org.drx.plugin.algebraictypes.generate.duality
 
 import org.drx.plugin.algebraictypes.basePath
+import org.drx.plugin.algebraictypes.generate.*
+import org.drx.plugin.algebraictypes.generate.products.generateProductType
+import org.drx.plugin.algebraictypes.generate.sums.generateSumType
 import org.gradle.api.Project
 import java.io.File
 

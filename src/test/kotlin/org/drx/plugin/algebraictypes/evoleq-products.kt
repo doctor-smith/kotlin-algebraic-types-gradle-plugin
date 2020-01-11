@@ -15,10 +15,10 @@
  */
 package org.drx.plugin.algebraictypes
 
-import org.drx.plugin.algebraictypes.generate.buildProductEvolveFunction
-import org.drx.plugin.algebraictypes.generate.buildProductEvolveFunctionWithSideEffect
-import org.drx.plugin.algebraictypes.generate.buildProductGetFunction
-import org.drx.plugin.algebraictypes.generate.generateEvoleqProduct
+import org.drx.plugin.algebraictypes.generate.evoleq.buildProductEvolveFunction
+import org.drx.plugin.algebraictypes.generate.evoleq.buildProductEvolveFunctionWithSideEffect
+import org.drx.plugin.algebraictypes.generate.evoleq.buildProductGetFunction
+import org.drx.plugin.algebraictypes.generate.evoleq.generateEvoleqProduct
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test

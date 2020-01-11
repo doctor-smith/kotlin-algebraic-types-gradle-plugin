@@ -13,9 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.plugin.algebraictypes.generate
+package org.drx.plugin.algebraictypes.generate.evoleq
 
 import org.drx.plugin.algebraictypes.basePath
+import org.drx.plugin.algebraictypes.generate.buildComment
+import org.drx.plugin.algebraictypes.generate.dist
+import org.drx.plugin.algebraictypes.generate.products.generateProductType
+import org.drx.plugin.algebraictypes.generate.license
 import org.gradle.api.Project
 import java.io.File
 

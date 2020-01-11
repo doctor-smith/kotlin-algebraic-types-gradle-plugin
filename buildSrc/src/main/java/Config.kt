@@ -2,7 +2,7 @@ object Config {
 
     object ProjectData {
         const val group = "org.drx"
-        const val version = "1.0.13"
+        const val version = "1.0.14"
         const val artifactId = "kotlin-algebraic-types-plugin"
         const val description = "Generate Algebraic Types"
 
@@ -21,10 +21,14 @@ object Config {
         const val kotlin = "1.3.50"
         const val coroutines = "1.3.1"
         const val junit = "4.12"
+
+        const val evoleq = "1.1.1"
     }
 
     object Dependencies {
-        val kotlinStandardLibrary = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${Versions.kotlin}"
-        val coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}"
+        const val kotlinStandardLibrary = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${Versions.kotlin}"
+        const val coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}"
+
+        const val evoleq = "org.drx:evoleq:${Versions.evoleq}"
     }
 }

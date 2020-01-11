@@ -13,16 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.plugin.algebraictypes
+package org.drx.plugin.algebraictypes.extension
 
-import org.drx.plugin.algebraictypes.generate.products.buildProductOperator
-import org.junit.Test
 
-class ProductTypeArithmeticTest {
+/**
+ * KeyGroups dsl
+ */
+fun AlgebraicTypesExtension.keyGroups(configuration: KeysExtension.()->Unit) {
+    val extension = KeysExtension()
+    extension.configuration()
 
-    @Test fun buildProductOperatorTest() {
-        val product = buildProductOperator(7, 6)
-        println(product)
-    }
-
+    keys.addAll(extension.keys)
 }
+
+open class Keys {
+    var name: String? = null
+    var number: Int? = null
+    var serialization: Boolean = false
+}
+
+open class KeysExtension {
+    val keys = arrayListOf<Keys>()
+}
+/**
+ * KeyGroup dsl
+ */
+fun KeysExtension.keyGroup(definition: Keys.()->Unit) {
+    val k = Keys()
+    k.definition()
+    keys.add(k)
+}
+

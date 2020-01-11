@@ -15,8 +15,8 @@
  */
 package org.drx.plugin.algebraictypes
 
-import org.drx.plugin.algebraictypes.generate.buildSumEvolveFunction
-import org.drx.plugin.algebraictypes.generate.buildSumGetFunction
+import org.drx.plugin.algebraictypes.generate.evoleq.buildSumEvolveFunction
+import org.drx.plugin.algebraictypes.generate.evoleq.buildSumGetFunction
 import org.junit.Test
 
 class EvoleqSumTest {
