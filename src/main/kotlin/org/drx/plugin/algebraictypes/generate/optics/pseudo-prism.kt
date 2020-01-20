@@ -19,10 +19,7 @@ import org.drx.plugin.algebraictypes.*
 import org.drx.plugin.algebraictypes.config.Config
 import org.drx.plugin.algebraictypes.config.Config.Defaults as Defaults
 import org.drx.plugin.algebraictypes.extension.*
-import org.drx.plugin.algebraictypes.generate.buildComment
-import org.drx.plugin.algebraictypes.generate.buildParaGraphComment
-import org.drx.plugin.algebraictypes.generate.buildSectionComment
-import org.drx.plugin.algebraictypes.generate.license
+import org.drx.plugin.algebraictypes.generate.*
 import org.drx.plugin.algebraictypes.generate.products.generateProductType
 import org.drx.plugin.algebraictypes.generate.serialization.buildSerialModuleName
 import org.drx.plugin.algebraictypes.generate.serialization.serialModule
@@ -43,6 +40,8 @@ fun generatePseudoPrisms(dataClasses: DataClasses, project: Project) {
     }
     val file = File("${project.projectDir}$basePath/prisms/functions.kt")
     file.writeText(buildAuxiliaryPrismFunctions())
+
+    generateDslMarker(project)
 
     // generate sums and products in all needed dimensions
     // sums
@@ -97,6 +96,7 @@ fun generatePseudoPrism(sealedClass: SealedClass, project: Project) {
 fun imports(dataClass: SealedClass): String {
     val dimension = dataClass.parameters.size
     val imports = hashSetOf(
+            "org.drx.generated.AlgebraicTypesDsl",
             "org.drx.generated.prisms.*",
             "org.drx.generated.products.*",
             "org.drx.generated.sums.*"
@@ -240,6 +240,7 @@ fun prismSetter(sealedClass: SealedClass, suspended: Boolean = false): String {
 
     return """
         |${buildComment(listOf("Prism setter function"), "", null)}
+        |@AlgebraicTypesDsl
         |${suspended(suspended)}fun $funGenerics${sealedClass.name}$classGenerics.${suspended(suspended, "Set", "set")}(transaction: ${prismSetterType(sealedClass, suspended)}): ${sealedClass.name}$classGenerics = with(transaction()) {
         |${Defaults.offset} when(this) {
         |${prismSetterCases(sealedClass, suspended)}
@@ -300,6 +301,7 @@ fun prismTransaction(sealedClass: SealedClass, suspended: Boolean = false): Stri
 
     return """
         ||${buildComment(listOf("Prism transaction function"), "", null)}
+        |@AlgebraicTypesDsl
         |${suspended(suspended)}fun $funGenerics${sealedClass.name}$classGenerics.${suspended(suspended, "Transaction", "transaction")}(transaction: ${prismTransactionArgumentType(sealedClass, suspended)}): ${prismSetterType(sealedClass, suspended)} = { 
         |${offset.repeatString(1)}when( this@${suspended(suspended, "Transaction", "transaction")} ) {
         |${prismTransactionCases(sealedClass, suspended)}
@@ -354,6 +356,7 @@ fun sharedPrismParameterSetter(sealedClass: SealedClass, sharedPrismParameter: S
 
     return """
         |${buildComment(listOf("Shared prism parameter setter function for", "parameter '${sharedPrismParameter.name}'"), "", null)}
+        |@AlgebraicTypesDsl
         |${suspended(suspended)}fun $funGenerics${type}.${sharedPrismParameter.name}(setter: ${suspended(suspended)}${setter(sharedPrismParameter.type)}): $type =
         |${offset}when( val summand = this ) {
         |${sharedPrismParameterSetterCases(sealedClass, sharedPrismParameter.occurrences, suspended)}

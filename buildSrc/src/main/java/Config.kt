@@ -2,7 +2,7 @@ object Config {
 
     object ProjectData {
         const val group = "org.drx"
-        const val version = "1.0.14"
+        const val version = "1.0.15"
         const val artifactId = "kotlin-algebraic-types-plugin"
         const val description = "Generate Algebraic Types"
 

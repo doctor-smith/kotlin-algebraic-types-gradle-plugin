@@ -19,10 +19,7 @@ import org.drx.plugin.algebraictypes.*
 import org.drx.plugin.algebraictypes.config.Config
 import org.drx.plugin.algebraictypes.config.Config.Defaults as Defaults
 import org.drx.plugin.algebraictypes.extension.*
-import org.drx.plugin.algebraictypes.generate.buildComment
-import org.drx.plugin.algebraictypes.generate.buildParaGraphComment
-import org.drx.plugin.algebraictypes.generate.buildSectionComment
-import org.drx.plugin.algebraictypes.generate.license
+import org.drx.plugin.algebraictypes.generate.*
 import org.drx.plugin.algebraictypes.generate.products.generateProductType
 import org.drx.plugin.algebraictypes.generate.serialization.buildSerialModuleName
 import org.drx.plugin.algebraictypes.generate.serialization.serialModule
@@ -39,6 +36,8 @@ fun generatePseudoLenses(dataClasses: DataClasses, project: Project) {
     }
     val file = File("${project.projectDir}$basePath/lenses/functions.kt")
     file.writeText(buildAuxiliaryFunctions())
+
+    generateDslMarker(project)
 
     // generate products in all needed dimensions
     with(dataClasses.dataClasses.map {
@@ -124,8 +123,9 @@ fun buildDataClass(dataClass: DataClass): String {
 fun imports(dataClass: DataClass): String {
     val dimension = dataClass.parameters.size
     val imports = hashSetOf(
-            "org.drx.generated.lenses.*",
-            "org.drx.generated.products.*"
+        "org.drx.generated.AlgebraicTypesDsl",
+        "org.drx.generated.lenses.*",
+        "org.drx.generated.products.*"
     )
     if(dataClass.serializable) {
         imports.addAll( Config.Serialization.imports )
@@ -229,7 +229,8 @@ fun functionGenerics(generics: String?) : String = if(generics == null){""}else{
 fun setter(dataClass: DataClass, generics: String?): String {
     val genericsOnClass = if(generics == null){""}else{"<$generics>"}
     val genericsOnFun = if(generics == null){""}else{"<$generics> "}
-    return """${buildComment("Setter function")}fun $genericsOnFun${dataClass.name}$genericsOnClass.set${if(dataClass.settersPostFix != ""){dataClass.settersPostFix}else{""}}(transaction: ${dataClass.name}$genericsOnClass.()->${productSetterType(dataClass, generics)}): ${dataClass.name}$genericsOnClass = with(transaction()) {
+    return """${buildComment("Setter function")}@AlgebraicTypesDsl
+        |fun $genericsOnFun${dataClass.name}$genericsOnClass.set${if(dataClass.settersPostFix != ""){dataClass.settersPostFix}else{""}}(transaction: ${dataClass.name}$genericsOnClass.()->${productSetterType(dataClass, generics)}): ${dataClass.name}$genericsOnClass = with(transaction()) {
         |   ${dataClass.name}(
         |${dataClass.parameters.mapIndexed{index, parameter -> "        ${parameter.name}.factor${index+1}()" }.joinToString(",\n") }      
         |   )   
@@ -244,7 +245,8 @@ fun setter(dataClass: DataClass, generics: String?): String {
 fun setterSuspended(dataClass: DataClass, generics: String?): String {
     val genericsOnClass = if(generics == null){""}else{"<$generics>"}
     val genericsOnFun = if(generics == null){""}else{"<$generics> "}
-    return """${buildComment("Suspended setter function")}suspend fun $genericsOnFun${dataClass.name}$genericsOnClass.suspendSet${if(dataClass.settersPostFix != ""){dataClass.settersPostFix}else{""}}(transaction: suspend ${dataClass.name}$genericsOnClass.()->${productSetterTypeSuspended(dataClass, generics)}): ${dataClass.name}$genericsOnClass = with(transaction()) {
+    return """${buildComment("Suspended setter function")}@AlgebraicTypesDsl
+        |suspend fun $genericsOnFun${dataClass.name}$genericsOnClass.suspendSet${if(dataClass.settersPostFix != ""){dataClass.settersPostFix}else{""}}(transaction: suspend ${dataClass.name}$genericsOnClass.()->${productSetterTypeSuspended(dataClass, generics)}): ${dataClass.name}$genericsOnClass = with(transaction()) {
         |   ${dataClass.name}(
         |${dataClass.parameters.mapIndexed{index, parameter -> "        ${parameter.name}.factor${index+1}()" }.joinToString(",\n") }      
         |   )   
@@ -270,7 +272,8 @@ fun transaction(dataClass: DataClass, dimension: Int, generics: String?): String
     val genericsOnClass = if(generics == null){""}else{"<$generics>"}
     val genericsOnFun = if(generics == null){""}else{"<$generics> "}
     val postFix  = if(dataClass.settersPostFix != ""){dataClass.settersPostFix}else{""}
-    return """${buildComment("Transaction function")}fun $genericsOnFun${dataClass.name}$genericsOnClass.transaction${postFix}(transaction: ${productSetterType(dataClass, generics)}.()->${productSetterType(dataClass, generics)}): ${dataClass.name}$genericsOnClass.()->${productSetterType(dataClass, generics)} 
+    return """${buildComment("Transaction function")}@AlgebraicTypesDsl
+        |fun $genericsOnFun${dataClass.name}$genericsOnClass.transaction${postFix}(transaction: ${productSetterType(dataClass, generics)}.()->${productSetterType(dataClass, generics)}): ${dataClass.name}$genericsOnClass.()->${productSetterType(dataClass, generics)} 
         |    = {Product$dimension(${dataClass.parameters.reversed().joinToString(", ") { "idSetter<${it.type.name}>()" }}).transaction()}
     """.trimMargin()
 }
@@ -293,7 +296,8 @@ fun transactionSuspended(dataClass: DataClass, dimension: Int, generics: String?
     val genericsOnClass = if(generics == null){""}else{"<$generics>"}
     val genericsOnFun = if(generics == null){""}else{"<$generics> "}
     val postFix  = if(dataClass.settersPostFix != ""){dataClass.settersPostFix}else{""}
-    return """${buildComment("Suspended transaction function")}suspend fun $genericsOnFun${dataClass.name}$genericsOnClass.suspendTransaction${postFix}(transaction: suspend ${productSetterTypeSuspended(dataClass, generics)}.()->${productSetterTypeSuspended(dataClass, generics)}): suspend ${dataClass.name}$genericsOnClass.()->${productSetterTypeSuspended(dataClass, generics)} 
+    return """${buildComment("Suspended transaction function")}@AlgebraicTypesDsl
+        |suspend fun $genericsOnFun${dataClass.name}$genericsOnClass.suspendTransaction${postFix}(transaction: suspend ${productSetterTypeSuspended(dataClass, generics)}.()->${productSetterTypeSuspended(dataClass, generics)}): suspend ${dataClass.name}$genericsOnClass.()->${productSetterTypeSuspended(dataClass, generics)} 
         |    = {Product$dimension(${dataClass.parameters.reversed().joinToString(", ") { "idSetterSuspended<${it.type.name}>()" }}).transaction()}
     """.trimMargin()
 }
@@ -327,7 +331,8 @@ fun parameterSettersSuspended(dataClass: DataClass, generics: String?): String {
 fun simpleParameterSetter(parameterName: String, parameterType: String, parameterIndex: Int, dataClass: DataClass, dimension: Int, generics: String?): String {
     val genericsOnClass = if(generics == null){""}else{"<$generics>"}
     val genericsOnFun = if(generics == null){""}else{"<$generics> "}
-    return """${buildComment("Simple parameter setter function for parameter '${parameterName}'")}fun ${genericsOnFun}${dataClass.name}${genericsOnClass}.${parameterName}(set: ${parameterType}.()->${parameterType}): ${dataClass.name}${genericsOnClass}
+    return """${buildComment("Simple parameter setter function for parameter '${parameterName}'")}@AlgebraicTypesDsl
+        |fun ${genericsOnFun}${dataClass.name}${genericsOnClass}.${parameterName}(set: ${parameterType}.()->${parameterType}): ${dataClass.name}${genericsOnClass}
         |${Defaults.offset}= copy(${parameterName} = ${parameterName}.set()) 
     """.trimMargin()
 }
@@ -336,7 +341,8 @@ fun simpleParameterSetter(parameterName: String, parameterType: String, paramete
 fun simpleParameterSetterSuspended(parameterName: String, parameterType: String, parameterIndex: Int, dataClass: DataClass, dimension: Int, generics: String?): String {
     val genericsOnClass = if(generics == null){""}else{"<$generics>"}
     val genericsOnFun = if(generics == null){""}else{"<$generics> "}
-    return """${buildComment("Simple suspended parameter setter function for parameter '${parameterName}'")}suspend fun ${genericsOnFun}${dataClass.name}${genericsOnClass}.suspend${parameterName.substring(0,1).toUpperCase()+parameterName.substring(1)}(set: suspend ${parameterType}.()->${parameterType}): ${dataClass.name}${genericsOnClass}
+    return """${buildComment("Simple suspended parameter setter function for parameter '${parameterName}'")}@AlgebraicTypesDsl
+        |suspend fun ${genericsOnFun}${dataClass.name}${genericsOnClass}.suspend${parameterName.substring(0,1).toUpperCase()+parameterName.substring(1)}(set: suspend ${parameterType}.()->${parameterType}): ${dataClass.name}${genericsOnClass}
         |${Defaults.offset}= copy(${parameterName} = ${parameterName}.set()) 
     """.trimMargin()
 }
@@ -361,7 +367,8 @@ fun parameterSetter(parameterName: String,parameterType: String, parameterIndex:
 fun parameterSetter(parameterName: String, parameterType: String, parameterIndex: Int, dataClass: DataClass, dimension: Int, generics: String?) : String {
     val genericsOnClass = if(generics == null){""}else{"<$generics>"}
     val genericsOnFun = if(generics == null){""}else{"<$generics> "}
-    return """${buildComment("Parameter setter function for parameter '${parameterName}'")}fun ${genericsOnFun}${productSetterType(dataClass, generics)}.$parameterName(setter: ${setter(parameterType)}): ${productSetterType(dataClass, generics)} = 
+    return """${buildComment("Parameter setter function for parameter '${parameterName}'")}@AlgebraicTypesDsl
+        |fun ${genericsOnFun}${productSetterType(dataClass, generics)}.$parameterName(setter: ${setter(parameterType)}): ${productSetterType(dataClass, generics)} = 
         |    this@$parameterName.map${parameterIndex +1} {oldSetter -> oldSetter then setter}
     """.trimMargin()
 }
@@ -384,7 +391,8 @@ fun parameterSetterSuspended(parameterName: String,parameterType: String, parame
 fun parameterSetterSuspended(parameterName: String, parameterType: String, parameterIndex: Int, dataClass: DataClass, dimension: Int, generics: String?) : String {
     val genericsOnClass = if(generics == null){""}else{"<$generics>"}
     val genericsOnFun = if(generics == null){""}else{"<$generics> "}
-    return """${buildComment("Suspended parameter setter function for parameter '${parameterName}'")}suspend fun ${genericsOnFun}${productSetterTypeSuspended(dataClass, generics)}.${parameterName}(setter: ${setterSuspended(parameterType)}): ${productSetterTypeSuspended(dataClass, generics)} = 
+    return """${buildComment("Suspended parameter setter function for parameter '${parameterName}'")}@AlgebraicTypesDsl
+        |suspend fun ${genericsOnFun}${productSetterTypeSuspended(dataClass, generics)}.${parameterName}(setter: ${setterSuspended(parameterType)}): ${productSetterTypeSuspended(dataClass, generics)} = 
         |    this@${parameterName}.suspendFluent({_,t->t}){ map${parameterIndex +1} {oldSetter -> oldSetter suspendThen setter}}
     """.trimMargin()
 }

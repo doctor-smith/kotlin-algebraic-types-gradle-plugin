@@ -212,6 +212,7 @@ sealed class SerializationType {
  * ====================================================================================================================
  */
 
+@AlgebraicTypesDsl
 fun AlgebraicTypesExtension.dataClasses(configuration: DataClasses.()->Unit) {
 
     val dataClasses = DataClasses()
@@ -219,6 +220,7 @@ fun AlgebraicTypesExtension.dataClasses(configuration: DataClasses.()->Unit) {
     this.dataClasses = dataClasses
 }
 
+@AlgebraicTypesDsl
 fun DataClasses.dataClass(configuration: DataClass.()->Unit) {
     val dataClass = DataClass()
     dataClass.configuration()
@@ -226,18 +228,21 @@ fun DataClasses.dataClass(configuration: DataClass.()->Unit) {
 }
 
 
+@AlgebraicTypesDsl
 fun DataClasses.sealedClass(configuration: SealedClass.()->Unit) {
     val sealedClass = SealedClass()
     sealedClass.configuration()
     sealedClasses.add(sealedClass)
 }
 
+@AlgebraicTypesDsl
 fun DataClasses.clazz(configuration: Class.()->Unit) {
     val clazz = Class()
     clazz.configuration()
     classes.add(clazz)
 }
 
+@AlgebraicTypesDsl
 fun DataClasses.objekt(configuration: Object.()->Unit) {
     val objekt = Object()
     objekt.configuration()
@@ -250,22 +255,27 @@ fun DataClass.parameter(configuration: Parameter.() -> Unit) {
     parameters.add(parameter)
 }
 
+@AlgebraicTypesDsl
 fun SealedClass.parameter(configuration: Parameter.() -> Unit) {
     val parameter = Parameter()
     parameter.configuration()
     parameters.add(parameter)
 }
 
+@AlgebraicTypesDsl
 fun SubClass.parameter(configuration: Parameter.() -> Unit) {
     val parameter = Parameter()
     parameter.configuration()
     parameters.add(parameter)
 }
 
+@AlgebraicTypesDsl
 fun SealedClass.representative(configuration: SubClass.() -> Unit) = subClass( configuration )
 
+@AlgebraicTypesDsl
 fun SealedClass.dataRepresentative(configuration: SubDataClass.() -> Unit) = representatives.add(subDataClass( configuration ))
 
+@AlgebraicTypesDsl
 fun ClassRepresentation.subDataClass(configuration: SubDataClass.()->Unit): SubDataClass {
     require(this !is DataClass)
     val subClass = SubDataClass(this)
@@ -273,6 +283,7 @@ fun ClassRepresentation.subDataClass(configuration: SubDataClass.()->Unit): SubD
     return subClass
 }
 
+@AlgebraicTypesDsl
 fun ClassRepresentation.subClass(configuration: SubClass.()->Unit) {
     require(this !is DataClass)
     val subClass = SubClass(this)
@@ -280,6 +291,7 @@ fun ClassRepresentation.subClass(configuration: SubClass.()->Unit) {
 }
 
 
+@AlgebraicTypesDsl
 fun Parameter.type(configuration: ParameterType.()->Unit) {
     val type = ParameterType()
     type.configuration()
@@ -293,6 +305,8 @@ fun Parameter.type(configuration: ParameterType.()->Unit) {
 /**
  *
  */
+
+@AlgebraicTypesDsl
 fun SubDataClass.toDataClass(): DataClass {
     val dataClass = DataClass()
     dataClass.name = name
@@ -304,10 +318,12 @@ fun SubDataClass.toDataClass(): DataClass {
     return dataClass
 }
 
+@AlgebraicTypesDsl
 fun Set<ClassRepresentation>.findByFullName(fullName: String): ClassRepresentation? = find{
     it.packageName + "." + it.name == fullName
 }
 
+@AlgebraicTypesDsl
 fun Set<ClassRepresentation>.findByNameIn(name: String, vararg locations: String): ClassRepresentation? {
     var result: ClassRepresentation? = null
     locations.forEach {
@@ -322,6 +338,7 @@ fun Set<ClassRepresentation>.findByNameIn(name: String, vararg locations: String
     return result
 }
 
+@AlgebraicTypesDsl
 fun DataClasses.toSet(): Set<ClassRepresentation> = with(hashSetOf<ClassRepresentation>()) {
     addAll(dataClasses)
     addAll(sealedClasses)

@@ -106,6 +106,7 @@ open class SingleDimensionSelectionExtension {
 /**
  * Root dsl function
  */
+@AlgebraicTypesDsl
 fun Project.algebraicTypes(configuration: AlgebraicTypesExtension.()->Unit) {
     (this as org.gradle.api.plugins.ExtensionAware).extensions.configure("algebraicTypes", configuration)
 }
@@ -113,6 +114,7 @@ fun Project.algebraicTypes(configuration: AlgebraicTypesExtension.()->Unit) {
 /**
  * Products dsl
  */
+@AlgebraicTypesDsl
 fun AlgebraicTypesExtension.products(configuration: DimensionSelectionExtension.()->Unit) {
     val extension = DimensionSelectionExtension()
     extension.configuration()
@@ -121,6 +123,7 @@ fun AlgebraicTypesExtension.products(configuration: DimensionSelectionExtension.
 /**
  * Sums dsl
  */
+@AlgebraicTypesDsl
 fun AlgebraicTypesExtension.sums(configuration: DimensionSelectionExtension.()->Unit) {
     val extension = DimensionSelectionExtension()
     extension.configuration()
@@ -130,6 +133,7 @@ fun AlgebraicTypesExtension.sums(configuration: DimensionSelectionExtension.()->
 /**
  * Product-Arithmetics dsl
  */
+@AlgebraicTypesDsl
 fun AlgebraicTypesExtension.productArithmetics(configuration: DimensionSelectionExtension.()->Unit) {
     val extension = DimensionSelectionExtension()
     extension.configuration()
@@ -139,6 +143,7 @@ fun AlgebraicTypesExtension.productArithmetics(configuration: DimensionSelection
 /**
  * Evoleq Products dsl
  */
+@AlgebraicTypesDsl
 fun AlgebraicTypesExtension.evoleqProducts(configuration: DimensionSelectionExtension.()->Unit) {
     val extension = DimensionSelectionExtension()
     extension.configuration()
@@ -148,6 +153,7 @@ fun AlgebraicTypesExtension.evoleqProducts(configuration: DimensionSelectionExte
 /**
  * Evoleq Sums dsl
  */
+@AlgebraicTypesDsl
 fun AlgebraicTypesExtension.evoleqSums(configuration: DimensionSelectionExtension.()->Unit) {
     val extension = DimensionSelectionExtension()
     extension.configuration()
@@ -157,6 +163,7 @@ fun AlgebraicTypesExtension.evoleqSums(configuration: DimensionSelectionExtensio
 /**
  * Dualities dsl
  */
+@AlgebraicTypesDsl
 fun AlgebraicTypesExtension.dualities(configuration: DimensionSelectionExtension.()->Unit) {
     val extension = DimensionSelectionExtension()
     extension.configuration()
@@ -203,6 +210,7 @@ open class OutputExtension {
 /**
  * Outputs dsl
  */
+@AlgebraicTypesDsl
 fun AlgebraicTypesExtension.outputs(configuration: OutputExtension.()->Unit) {
     val extension = OutputExtension()
     extension.configuration()

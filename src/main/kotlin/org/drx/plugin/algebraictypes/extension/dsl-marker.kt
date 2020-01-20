@@ -15,36 +15,4 @@
  */
 package org.drx.plugin.algebraictypes.extension
 
-
-/**
- * KeyGroups dsl
- */
-
-@AlgebraicTypesDsl
-fun AlgebraicTypesExtension.keyGroups(configuration: KeysExtension.()->Unit) {
-    val extension = KeysExtension()
-    extension.configuration()
-
-    keys.addAll(extension.keys)
-}
-
-open class Keys {
-    var name: String? = null
-    var number: Int? = null
-    var serialization: Boolean = false
-}
-
-open class KeysExtension {
-    val keys = arrayListOf<Keys>()
-}
-/**
- * KeyGroup dsl
- */
-
-@AlgebraicTypesDsl
-fun KeysExtension.keyGroup(definition: Keys.()->Unit) {
-    val k = Keys()
-    k.definition()
-    keys.add(k)
-}
-
+@DslMarker annotation class AlgebraicTypesDsl
