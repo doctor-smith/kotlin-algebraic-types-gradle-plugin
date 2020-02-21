@@ -1,4 +1,4 @@
-[![Download](https://img.shields.io/badge/Gradle%20Plugin%20Portal-1.0.15-blue.svg)](https://plugins.gradle.org/plugin/org.drx.kotlin-algebraic-types-plugin)
+[![Download](https://img.shields.io/badge/Gradle%20Plugin%20Portal-1.0.16-blue.svg)](https://plugins.gradle.org/plugin/org.drx.kotlin-algebraic-types-plugin)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 # Algebraic Types Gradle Plugin
