@@ -106,14 +106,14 @@ fun imports(dataClass: SealedClass): String {
     }
     imports.addAll(dataClass.parameters.map{
         with(hashSetOf<String>()){
-            add(it.type.packageName + "." + it.type.name)
+            add(it.type.packageName + "." + it.type.name.nonNullable())
 
             // serailization
             if(it.type.serializable && dataClass.serializable) {
                 add(it.type.packageName + "." + buildSerialModuleName(it.type.name))
             }
             it.type.dependencies.forEach {dependency ->
-                add(dependency.packageName + "." + dependency.name)
+                add(dependency.packageName + "." + dependency.name.nonNullable())
                 if(!it.type.serializable && dataClass.serializable && dependency.serializable) {
                     add(dependency.packageName + "." + buildSerialModuleName(dependency.name))
                 }

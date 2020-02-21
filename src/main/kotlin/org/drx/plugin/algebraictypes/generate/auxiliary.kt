@@ -41,6 +41,10 @@ fun usesPlugin(): String = """
 
 fun dist() = "\n\n"
 
+fun String.nonNullable(): String = when(endsWith("?")) {
+    true -> dropLast(1)
+    false -> this
+}
 /**
  * Generic Types
  * ====================================================================================================================
