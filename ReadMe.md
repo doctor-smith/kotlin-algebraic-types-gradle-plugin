@@ -8,7 +8,7 @@ Generate product- and sum-types of arbitrary finite 'dimension' together with re
 Add the plugin id to the plugin-block of your build.gradle.kts file
 ```kotlin
 plugins{
-    id("org.drx.kotlin-algebraic-types-plugin") version "1.0.15"
+    id("org.drx.kotlin-algebraic-types-plugin") version "1.0.16"
 }
 
 ```
