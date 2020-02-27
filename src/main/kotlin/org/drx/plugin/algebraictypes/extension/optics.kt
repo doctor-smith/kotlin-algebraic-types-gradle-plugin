@@ -194,8 +194,8 @@ open class ParameterType {
 }
 
 open class ParameterTypeDependency(
-        val name:String,
-        val packageName : String,
+        var name:String,
+        var packageName : String,
         var serializable: Boolean = false,
         var serializationType: SerializationType = SerializationType.NotSerializable
 )
@@ -249,6 +249,7 @@ fun DataClasses.objekt(configuration: Object.()->Unit) {
     objects.add(objekt)
 }
 
+@AlgebraicTypesDsl
 fun DataClass.parameter(configuration: Parameter.() -> Unit) {
     val parameter = Parameter()
     parameter.configuration()
@@ -298,6 +299,11 @@ fun Parameter.type(configuration: ParameterType.()->Unit) {
     this.type = type
 }
 
+@AlgebraicTypesDsl
+fun ParameterType.dependency(configuration: ParameterTypeDependency.() -> Unit) = with(ParameterTypeDependency("","")) {
+    configuration()
+    dependencies.add(this)
+}
 /**
  * Auxiliary functions
  * ====================================================================================================================

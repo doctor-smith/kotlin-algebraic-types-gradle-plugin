@@ -133,13 +133,13 @@ fun imports(dataClass: DataClass): String {
     imports.addAll(dataClass.parameters.map{
         with(hashSetOf<String>()){
             if(!it.type.name.contains("<")) {
-                add(it.type.packageName + "." + it.type.name.nonNullable())
+                add(it.type.packageName + "." + it.type.name.fixTypeNameForImport().nonNullable())
             }
             if(it.type.serializable && dataClass.serializable && !it.type.name.contains("<")) {
                 add(it.type.packageName + "." + buildSerialModuleName(it.type.name))
             }
             it.type.dependencies.forEach {dependency ->
-                add(dependency.packageName + "." + dependency.name.nonNullable())
+                add(dependency.packageName + "." + dependency.name.fixTypeNameForImport().nonNullable())
                 if(!it.type.serializable && dataClass.serializable && dependency.serializable) {
                     add(dependency.packageName + "." + buildSerialModuleName(dependency.name))
                 }

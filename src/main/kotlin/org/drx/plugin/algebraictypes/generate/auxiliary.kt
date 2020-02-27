@@ -41,9 +41,19 @@ fun usesPlugin(): String = """
 
 fun dist() = "\n\n"
 
+/**
+ * Type names in import-statements
+ * ====================================================================================================================
+ */
+
 fun String.nonNullable(): String = when(endsWith("?")) {
     true -> dropLast(1)
     false -> this
+}
+
+fun String.fixTypeNameForImport() : String = when(contains(".")) {
+    false -> this
+    true -> split(".")[0]
 }
 /**
  * Generic Types
