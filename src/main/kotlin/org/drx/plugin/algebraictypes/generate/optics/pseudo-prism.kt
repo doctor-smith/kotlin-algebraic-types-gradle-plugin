@@ -40,18 +40,18 @@ fun generatePseudoPrisms(dataClasses: DataClasses, project: Project) {
     with(dataClasses.sealedClasses.map {
         SimplifiedDimensionSelection(it.representatives.size,it.sourceFolder, it.domain, it.packageName )
     }.toHashSet()) set@{
-        with(hashSetOf<SimplifiedDimensionSelection>()) {
-            with(this) {
-                map{Triple(it.sourceFolder,it.domain, it.packageName)}.toHashSet().forEach {
-                    with(project.file(it.first,it.second,algTypesFolder.prismPackage())){
-                        if(!exists()) {
-                            mkdirs()
-                        }
-                        File(this, "functions.kt").writeText(buildAuxiliaryPrismFunctions("${it.second}.$algTypesFolder"))
-                        generateDslMarker(project, it.first, it.second,algTypesFolder)
+        with(this) {
+            map{Triple(it.sourceFolder,it.domain, it.packageName)}.toHashSet().forEach {
+                with(project.file(it.first,it.second,algTypesFolder.prismPackage())){
+                    if(!exists()) {
+                        mkdirs()
                     }
+                    File(this, "functions.kt").writeText(buildAuxiliaryPrismFunctions("${it.second}.$algTypesFolder"))
+                    generateDslMarker(project, it.first, it.second,algTypesFolder)
                 }
             }
+        }
+        with(hashSetOf<SimplifiedDimensionSelection>()) {
             forEach {
                 add(SimplifiedDimensionSelection(2, it.sourceFolder, it.domain, it.packageName))
             }
@@ -81,7 +81,7 @@ fun generatePseudoPrisms(dataClasses: DataClasses, project: Project) {
     // build dependency
     // generate prisms
     dataClasses.sealedClasses.forEach {
-        generatePseudoPrism(it, project)
+        generatePseudoPrism(it,algTypesFolder, project)
     }
 }
 
@@ -90,7 +90,7 @@ fun generatePseudoPrisms(dataClasses: DataClasses, project: Project) {
 /**
  * Generate pseudo lens
  */
-fun generatePseudoPrism(sealedClass: SealedClass, project: Project) {
+fun generatePseudoPrism(sealedClass: SealedClass, algTypesFolder: String, project: Project) {
     // build string representation and save it
     with(file(sealedClass, project)){
         if(!exists()) {
@@ -98,7 +98,7 @@ fun generatePseudoPrism(sealedClass: SealedClass, project: Project) {
             createNewFile()
 
         }
-        writeText(buildSealedClassFileContent(sealedClass))
+        writeText(buildSealedClassFileContent(sealedClass, algTypesFolder))
     }
 }
 
@@ -106,13 +106,19 @@ fun generatePseudoPrism(sealedClass: SealedClass, project: Project) {
  * Sealed class may depend on types which need to be imported.
  * Compute the imports of the sealed class.
  */
-fun imports(dataClass: SealedClass): String {
+fun imports(dataClass: SealedClass, algTypesFolder: String): String {
     val dimension = dataClass.parameters.size
     val imports = hashSetOf(
+        "${dataClass.domain}.${algTypesFolder.annotationPackage()}.AlgebraicTypesDsl",
+        "${dataClass.domain}.${algTypesFolder.prismPackage()}.*",
+        "${dataClass.domain}.${algTypesFolder.productsPackage()}.*",
+        "${dataClass.domain}.${algTypesFolder.sumsPackage()}.*"
+        /*
             "org.drx.generated.AlgebraicTypesDsl",
             "org.drx.generated.prisms.*",
             "org.drx.generated.products.*",
             "org.drx.generated.sums.*"
+        */
     )
     if(dataClass.serializable) {
         imports.addAll( Config.Serialization.imports )
@@ -154,12 +160,12 @@ fun imports(dataClass: SealedClass): String {
             .joinToString("\n")
 }
 
-fun buildSealedClassFileContent(sealedClass: SealedClass): String {
+fun buildSealedClassFileContent(sealedClass: SealedClass, algTypesFolder: String): String {
     return """${license()}
         |
         |package ${packageName(sealedClass)}
         |
-        |${imports(sealedClass)}
+        |${imports(sealedClass, algTypesFolder)}
         |
         |${classRepresentation((sealedClass))}
         |${if(sealedClass.serializable){"\n${serialModule(sealedClass)}"}else{""}}
@@ -544,7 +550,7 @@ fun suspended(suspended: Boolean, postFix: String = " ", whenFalse: String = "")
  */
 fun packageName(sealedClass: SealedClass) :String = when(sealedClass.packageName) {
     "" -> "org.drx.generated.prisms"
-    else -> sealedClass.packageName
+    else -> sealedClass.domain + "." + sealedClass.packageName
 }
 
 fun prismSetterFunctionGenerics(sealedClass: SealedClass): String {

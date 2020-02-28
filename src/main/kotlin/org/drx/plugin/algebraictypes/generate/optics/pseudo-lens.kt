@@ -443,7 +443,7 @@ fun productSetterTypeSuspended(dataClass: DataClass, generics: String?): String 
  */
 fun packageName(dataClass: DataClass) :String = when(dataClass.packageName) {
     "" -> "org.drx.generated.lenses"
-    else -> dataClass.domain + "." +dataClass.packageName
+    else -> dataClass.domain + "." + dataClass.packageName
 }
 
 /**

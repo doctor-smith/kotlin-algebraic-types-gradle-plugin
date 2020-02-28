@@ -99,7 +99,7 @@ fun String.productsPackage(): String = when {
     else -> this + "." + TypePackage.product
 }
 fun String.sumsPackage(): String = when {
-    endsWith(TypePackage.annotation) -> replaceLast(TypePackage.annotation, TypePackage.product)
+    endsWith(TypePackage.annotation) -> replaceLast(TypePackage.annotation, TypePackage.sum)
     endsWith(TypePackage.product) -> replaceLast(TypePackage.product, TypePackage.sum)
     endsWith(TypePackage.duality) -> replaceLast(TypePackage.duality, TypePackage.sum)
     endsWith(TypePackage.evoleqSum) -> replaceLast(TypePackage.evoleqSum, TypePackage.sum)
@@ -111,7 +111,7 @@ fun String.sumsPackage(): String = when {
     else -> this + "." +TypePackage.sum
 }
 fun String.dualityPackage(): String = when {
-    endsWith(TypePackage.annotation) -> replaceLast(TypePackage.annotation, TypePackage.product)
+    endsWith(TypePackage.annotation) -> replaceLast(TypePackage.annotation, TypePackage.duality)
     endsWith(TypePackage.product) -> replaceLast(TypePackage.product, TypePackage.duality)
     endsWith(TypePackage.sum) -> replaceLast(TypePackage.sum, TypePackage.duality)
     endsWith(TypePackage.evoleqSum) -> replaceLast(TypePackage.evoleqSum, TypePackage.duality)
@@ -124,7 +124,7 @@ fun String.dualityPackage(): String = when {
 }
 
 fun String.evoleqSumPackage() = when {
-    endsWith(TypePackage.annotation) -> replaceLast(TypePackage.annotation, TypePackage.product)
+    endsWith(TypePackage.annotation) -> replaceLast(TypePackage.annotation, TypePackage.evoleqSum)
     endsWith(TypePackage.product) -> replaceLast(TypePackage.product, TypePackage.evoleqSum)
     endsWith(TypePackage.sum) -> replaceLast(TypePackage.sum, TypePackage.evoleqSum)
     endsWith(TypePackage.duality) -> replaceLast(TypePackage.duality, TypePackage.evoleqSum)
@@ -136,7 +136,7 @@ fun String.evoleqSumPackage() = when {
     else -> this + "." + TypePackage.evoleqSum
 }
 fun String.evoleqProductPackage() = when {
-    endsWith(TypePackage.annotation) -> replaceLast(TypePackage.annotation, TypePackage.product)
+    endsWith(TypePackage.annotation) -> replaceLast(TypePackage.annotation, TypePackage.evoleqProduct)
     endsWith(TypePackage.product) -> replaceLast(TypePackage.product, TypePackage.evoleqProduct)
     endsWith(TypePackage.sum) -> replaceLast(TypePackage.product, TypePackage.evoleqProduct)
     endsWith(TypePackage.duality) -> replaceLast(TypePackage.duality, TypePackage.evoleqProduct)
@@ -149,7 +149,7 @@ fun String.evoleqProductPackage() = when {
 }
 
 fun String.lensPackage(): String = when {
-    endsWith(TypePackage.annotation) -> replaceLast(TypePackage.annotation, TypePackage.product)
+    endsWith(TypePackage.annotation) -> replaceLast(TypePackage.annotation, TypePackage.lens)
     endsWith(TypePackage.product) -> replaceLast(TypePackage.product, TypePackage.lens)
     endsWith(TypePackage.duality) -> replaceLast(TypePackage.duality, TypePackage.lens)
     endsWith(TypePackage.evoleqSum) -> replaceLast(TypePackage.evoleqSum, TypePackage.lens)
@@ -162,7 +162,7 @@ fun String.lensPackage(): String = when {
 }
 
 fun String.prismPackage(): String = when {
-    endsWith(TypePackage.annotation) -> replaceLast(TypePackage.annotation, TypePackage.product)
+    endsWith(TypePackage.annotation) -> replaceLast(TypePackage.annotation, TypePackage.prism)
     endsWith(TypePackage.product) -> replaceLast(TypePackage.product, TypePackage.prism)
     endsWith(TypePackage.duality) -> replaceLast(TypePackage.duality, TypePackage.prism)
     endsWith(TypePackage.evoleqSum) -> replaceLast(TypePackage.evoleqSum, TypePackage.prism)

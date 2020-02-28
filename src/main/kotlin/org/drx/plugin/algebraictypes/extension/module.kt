@@ -31,16 +31,6 @@ fun AlgebraicTypesExtension.sourceSet(configuration: ModuleExtension.()->Unit) {
         }
         // data classes
         this@sourceSet.dataClasses = this@moduleExtension.merge(this@sourceSet.dataClasses, dataClasses)
-        /*
-        if(dataClasses != null) {
-            if(this@sourceSet.dataClasses == null) {
-                this@sourceSet.dataClasses = this@moduleExtension.dataClasses!!.modularize(this@moduleExtension)
-            } else {
-                this@sourceSet.dataClasses!!.dataClasses.addAll(this@moduleExtension.dataClasses!!.modularize(this@moduleExtension).dataClasses)
-            }
-        }
-        
-         */
     }
 }
 
