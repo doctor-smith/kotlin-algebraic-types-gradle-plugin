@@ -1,5 +1,9 @@
 package org.drx.plugin.algebraictypes.extension
 
+import org.drx.plugin.algebraictypes.config.Config
+import org.drx.plugin.algebraictypes.generate.keysPackage
+import org.drx.plugin.algebraictypes.generate.packageCase
+
 open class ModuleExtension {
     lateinit var sourceFolder: String
     lateinit var domain: String
@@ -106,7 +110,7 @@ fun DimensionSelection.Complex.modularize(moduleExtension: ModuleExtension): Dim
                 (selection as DimensionSelection.Single).dimension,
                 sourceFolder,
                 moduleExtension.domain,
-                selection.packageName
+            Config.GeneratedSources.AlgebraicTypes.packageName + "." + selection.packageName // todo think about this
             )
         }.toTypedArray()))
         this
@@ -150,7 +154,10 @@ fun ArrayList<Keys>.modularize(moduleExtension: ModuleExtension): ArrayList<Keys
         serialization = key.serialization
         sourceFolder = moduleExtension.sourceFolder
         domain = moduleExtension.domain
-        packageName = key.packageName
+        packageName = "${Config.GeneratedSources.AlgebraicTypes.packageName}${when(key.packageName){
+            "" -> ""
+            else -> ".${key.packageName}"
+        } }".packageCase() // todo think about this
     } }
     keys
 }

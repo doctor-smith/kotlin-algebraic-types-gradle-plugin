@@ -30,7 +30,7 @@ import java.io.File
  * Generate pseudo lenses
  */
 fun generatePseudoLenses(dataClasses: DataClasses, project: Project) {
-    val algTypesFolder = "algtypes"
+    val algTypesFolder = Config.GeneratedSources.AlgebraicTypes.packageName
     // generate products in all needed dimensions
     with(dataClasses.dataClasses.map {
         SimplifiedDimensionSelection(it.parameters.size, it.sourceFolder, it.domain, it.packageName)

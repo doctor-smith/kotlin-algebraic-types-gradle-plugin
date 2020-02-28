@@ -34,7 +34,7 @@ import java.io.File
 // TODO Support other representatives than data classes
 // TODO Support kotlin serialization
 fun generatePseudoPrisms(dataClasses: DataClasses, project: Project) {
-    val algTypesFolder = "algtypes"
+    val algTypesFolder = Config.GeneratedSources.AlgebraicTypes.packageName
     // generate sums and products in all needed dimensions
     // sums
     with(dataClasses.sealedClasses.map {

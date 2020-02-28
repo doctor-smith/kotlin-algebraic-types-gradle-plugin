@@ -21,7 +21,7 @@ object Config {
         const val basePackage = "org.drx.generated"
 
         object AlgebraicTypes {
-            const val packageName = "algebraic"
+            const val packageName = "algtypes"
         }
         
         object Base {

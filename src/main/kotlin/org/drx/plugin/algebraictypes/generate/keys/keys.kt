@@ -32,6 +32,8 @@ package org.drx.plugin.algebraictypes.generate.keys
  */
 
 import org.drx.plugin.algebraictypes.basePath
+import org.drx.plugin.algebraictypes.generate.file
+import org.drx.plugin.algebraictypes.generate.keysPackage
 import org.drx.plugin.algebraictypes.generate.license
 import org.gradle.api.Project
 import java.io.File
@@ -42,16 +44,17 @@ import java.io.File
  *
  **********************************************************************************************************************/
 
-fun generateKeys(prefix: String = "", number: Int = 0, project: Project) {
+fun generateKeys(prefix: String = "", number: Int = 0, project: Project, sourceFolder: String, domain: String, packageName: String) {
 
     require(number > -1)
 
-    val dir = File("${project.projectDir}$basePath/keys")
+    //val dir = File("${project.projectDir}$basePath/keys")
+    val dir = project.file(sourceFolder,domain,packageName.keysPackage())
     if (!dir.exists()) {
         dir.mkdirs()
     }
     var keys = license()
-    keys += "\n\npackage org.drx.generated.keys\n\n\n"
+    keys += "\n\npackage $domain.${packageName.keysPackage()}\n\n\n"
 
     var classRefs = ""
     var classes = ""
@@ -84,7 +87,7 @@ fun generateKeys(prefix: String = "", number: Int = 0, project: Project) {
 
         filenamePrefix = prefix.toLowerCase()+"-"
     }
-    val keysFile = File("${project.projectDir}$basePath/keys/${filenamePrefix}keys.kt")
+    val keysFile = File(dir,"${filenamePrefix}keys.kt")
     keysFile.writeText(keys)
     println("Generating $number keys")
 }
@@ -139,15 +142,15 @@ fun generateKeyGroup (prefix: String = "", number: Int = 0, project: Project) {
     //println("Generating $number keys")
 }
 
-fun generateKeyGroup1(prefix: String = "", number: Int = 0, serialization: Boolean, project: Project) {
+fun generateKeyGroup1(prefix: String = "", number: Int = 0, serialization: Boolean, project: Project, sourceFolder: String, domain: String, packageName: String) {
     require(number > -1)
 
-    val dir = File("${project.projectDir}$basePath/keys")
+    val dir = project.file(sourceFolder, domain, packageName.keysPackage())
     if (!dir.exists()) {
         dir.mkdirs()
     }
     var keys = license()
-    keys += "\n\npackage org.drx.generated.keys\n\n\n"
+    keys += "\n\npackage $domain.${packageName.keysPackage()}\n\n\n"
 
     var keyClass = ""
     var keyObject = ""
@@ -232,7 +235,8 @@ fun generateKeyGroup1(prefix: String = "", number: Int = 0, serialization: Boole
 
         filenamePrefix = prefix.toLowerCase()+"-"
     }
-    val keysFile = File("${project.projectDir}$basePath/keys/${filenamePrefix}keys.kt")
+    val keysFile = //File("${project.projectDir}$basePath/keys/${filenamePrefix}keys.kt")
+        File(dir, "${filenamePrefix}keys.kt")
     keysFile.writeText(keys)
     //println(keys)
     //println("Generating $number keys")

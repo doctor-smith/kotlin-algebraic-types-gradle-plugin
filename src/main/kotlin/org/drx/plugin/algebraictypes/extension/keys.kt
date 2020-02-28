@@ -32,7 +32,7 @@ open class Keys {
     var name: String? = null
     var sourceFolder: String? = null
     var domain: String? = null
-    var packageName: String? = null
+    var packageName: String? = ""
     var number: Int? = null
     var serialization: Boolean = false
 }
