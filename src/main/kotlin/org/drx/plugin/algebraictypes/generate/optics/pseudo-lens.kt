@@ -30,36 +30,42 @@ import java.io.File
  * Generate pseudo lenses
  */
 fun generatePseudoLenses(dataClasses: DataClasses, project: Project) {
-    val dir = File("${project.projectDir}$basePath/lenses")
-    if(!dir.exists()) {
-        dir.mkdirs()
-    }
-    val file = File("${project.projectDir}$basePath/lenses/functions.kt")
-    file.writeText(buildAuxiliaryFunctions())
-
-    generateDslMarker(project)
-
+    val algTypesFolder = "algtypes"
     // generate products in all needed dimensions
     with(dataClasses.dataClasses.map {
-        it.parameters.size
-    }.toHashSet()){
-        add(2)
+        SimplifiedDimensionSelection(it.parameters.size, it.sourceFolder, it.domain, it.packageName)
+    }.toHashSet()) set@{
+        with(this) {
+            map{Triple(it.sourceFolder,it.domain, it.packageName)}.toHashSet().forEach {
+                with(project.file(it.first,it.second,algTypesFolder.lensPackage())){
+                    if(!exists()) {
+                        mkdirs()
+                    }
+                    File(this, "functions.kt").writeText(buildAuxiliaryFunctions("${it.second}.${algTypesFolder}"))
+                    generateDslMarker(project, it.first, it.second,algTypesFolder)// it.third)
+                }
+            }
+        }
+        with(hashSetOf<SimplifiedDimensionSelection>()) {
+            forEach {
+                add(SimplifiedDimensionSelection(2, it.sourceFolder, it.domain, it.packageName))
+            }
+            this@set.addAll(this)
+        }
         forEach {
-            generateProductType(it, project)
+            generateProductType(it.dimension, project, it.sourceFolder, it.domain,algTypesFolder)
         }
     }
-
-
     // generate classes
     dataClasses.dataClasses.forEach {
-        generatePseudoLens(it, project)
+        generatePseudoLens(it,  algTypesFolder,project)
     }
 }
 
 /**
  * Generate pseudo lens
  */
-fun generatePseudoLens(dataClass: DataClass, project: Project) {
+fun generatePseudoLens(dataClass: DataClass, algTypes: String, project: Project) {
     // build string representation and save it
     with(file(dataClass, project)){
         if(!exists()) {
@@ -67,14 +73,14 @@ fun generatePseudoLens(dataClass: DataClass, project: Project) {
             createNewFile()
 
         }
-        writeText(buildDataClass(dataClass))
+        writeText(buildDataClass(dataClass, algTypes))
     }
 }
 
 /**
  * Build the data class
  */
-fun buildDataClass(dataClass: DataClass): String {
+fun buildDataClass(dataClass: DataClass, algTypes: String): String {
 
     val generics = generics(dataClass)
 
@@ -82,7 +88,7 @@ fun buildDataClass(dataClass: DataClass): String {
         |
         |package ${packageName(dataClass)}
         |
-        |${imports(dataClass)}
+        |${imports(dataClass, algTypes)}
         |
         |
         |${buildComment(dataClass.comment)}
@@ -120,12 +126,18 @@ fun buildDataClass(dataClass: DataClass): String {
  * Data class may depend on types which need to be imported.
  * Compute the imports of the data class.
  */
-fun imports(dataClass: DataClass): String {
+fun imports(dataClass: DataClass, algTypes: String): String {
     val dimension = dataClass.parameters.size
     val imports = hashSetOf(
+        "${dataClass.domain}.${algTypes.annotationPackage()}.AlgebraicTypesDsl",
+        "${dataClass.domain}.${algTypes.lensPackage()}.*",
+        "${dataClass.domain}.${algTypes.productsPackage()}.*"
+        /*
         "org.drx.generated.AlgebraicTypesDsl",
         "org.drx.generated.lenses.*",
         "org.drx.generated.products.*"
+        
+         */
     )
     if(dataClass.serializable) {
         imports.addAll( Config.Serialization.imports )
@@ -431,7 +443,7 @@ fun productSetterTypeSuspended(dataClass: DataClass, generics: String?): String 
  */
 fun packageName(dataClass: DataClass) :String = when(dataClass.packageName) {
     "" -> "org.drx.generated.lenses"
-    else -> dataClass.packageName
+    else -> dataClass.domain + "." +dataClass.packageName
 }
 
 /**
@@ -442,9 +454,9 @@ fun file(dataClass: DataClass, project: Project): File = when(dataClass.sourceFo
     else -> File(project.projectDir, "${dataClass.sourceFolder}/${packageName(dataClass).replace(".","/")}/${dataClass.name}.kt".replace("//","/"))
 }
 
-fun buildAuxiliaryFunctions(): String = """${license()}
+fun buildAuxiliaryFunctions(packageName: String): String = """${license()}
     |
-    |package org.drx.generated.lenses
+    |package ${packageName.lensPackage()}
     |
     |${buildIdSetter()}
     |

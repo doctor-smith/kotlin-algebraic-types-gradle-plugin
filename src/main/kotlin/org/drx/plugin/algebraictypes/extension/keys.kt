@@ -30,6 +30,9 @@ fun AlgebraicTypesExtension.keyGroups(configuration: KeysExtension.()->Unit) {
 
 open class Keys {
     var name: String? = null
+    var sourceFolder: String? = null
+    var domain: String? = null
+    var packageName: String? = null
     var number: Int? = null
     var serialization: Boolean = false
 }

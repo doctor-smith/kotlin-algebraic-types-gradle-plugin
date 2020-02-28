@@ -17,11 +17,52 @@ package org.drx.plugin.algebraictypes.extension
 
 import org.gradle.api.Project
 
-sealed class DimensionSelection {
-    data class Single(val dimension: Int) : DimensionSelection()
-    data class Range(val from: Int = 2, val to: Int) : DimensionSelection()
-    data class List(val list: ArrayList<Int>) : DimensionSelection()
-    data class Complex(val list: ArrayList<DimensionSelection> = arrayListOf()) : DimensionSelection()
+sealed class DimensionSelection(
+    open val sourceFolder: String,
+    open val domain: String,
+    open val packageName: String
+) {
+    data class Single(
+        val dimension: Int,
+        override val sourceFolder: String = "",
+        override val domain: String = "",
+        override  val packageName: String = ""
+    ) : DimensionSelection(
+        sourceFolder,
+        domain,
+        packageName
+    )
+    data class Range(
+        val from: Int = 2,
+        val to: Int,
+        override val sourceFolder: String = "",
+        override val domain: String = "",
+        override  val packageName: String = ""
+    ) : DimensionSelection(
+        sourceFolder,
+        domain,
+        packageName
+    )
+    data class List(
+        val list: ArrayList<Int>,
+        override val sourceFolder: String = "",
+        override val domain: String = "",
+        override  val packageName: String = ""
+    ) : DimensionSelection(
+        sourceFolder,
+        domain,
+        packageName
+    )
+    data class Complex(
+        val list: ArrayList<DimensionSelection> = arrayListOf(),
+        override val sourceFolder: String = "",
+        override val domain: String = "",
+        override  val packageName: String = ""
+    ) : DimensionSelection(
+        sourceFolder,
+        domain,
+        packageName
+    )
 }
 
 fun DimensionSelection.toSet(): HashSet<Int> = when (this) {
@@ -33,6 +74,28 @@ fun DimensionSelection.toSet(): HashSet<Int> = when (this) {
         list.forEach { result.addAll ( it.toSet() ) }
         result
     }
+}
+
+data class SimplifiedDimensionSelection(
+    val dimension: Int,
+    val sourceFolder: String,
+    val domain: String,
+    val packageName: String
+)
+
+fun DimensionSelection.simplify(): HashSet<SimplifiedDimensionSelection> = when(this) {
+    is DimensionSelection.Single -> hashSetOf(SimplifiedDimensionSelection(dimension, sourceFolder,domain, packageName))
+    is DimensionSelection.Range -> hashSetOf(*IntRange(from,to).toList().map{dimension -> SimplifiedDimensionSelection(dimension, sourceFolder,domain, packageName)}.toTypedArray())
+    
+    is DimensionSelection.List -> list.map{dimension -> SimplifiedDimensionSelection(dimension, sourceFolder,domain, packageName)}.toHashSet()
+    
+    is DimensionSelection.Complex -> {
+        val result = hashSetOf<SimplifiedDimensionSelection>()
+        list.forEach { result.addAll ( it.simplify() ) }
+        result
+    }
+    
+    
 }
 
 open class AlgebraicTypesExtension {
@@ -54,52 +117,52 @@ open class AlgebraicTypesExtension {
 open class DimensionSelectionExtension {
     var dimensionSelection: DimensionSelection? = null
 
-    fun single(dimension: Int) {
+    fun single(dimension: Int, sourceFolder: String = "", packageName: String = "") {
         if(dimensionSelection != null) {
             throw Exception("Selection already set")
         }
-        dimensionSelection = DimensionSelection.Single(dimension)
+        dimensionSelection = DimensionSelection.Single(dimension,sourceFolder,packageName)
     }
 
-    fun dimension(dimension: Int) {
+    fun dimension(dimension: Int, sourceFolder: String = "", packageName: String = "") {
         if(dimensionSelection is DimensionSelection.Single) {
             throw Exception("Selection already set")
         }
         if(dimensionSelection == null) {
-            dimensionSelection = DimensionSelection.Complex()
+            dimensionSelection = DimensionSelection.Complex( sourceFolder = sourceFolder, packageName = packageName)
         }
-        (dimensionSelection as DimensionSelection.Complex).list.add(DimensionSelection.Single(dimension))
+        (dimensionSelection as DimensionSelection.Complex).list.add(DimensionSelection.Single(dimension,sourceFolder, packageName))
     }
 
-    fun list(vararg dimensions: Int) {
+    fun list(vararg dimensions: Int, sourceFolder: String = "", packageName: String = "") {
         if(dimensionSelection  is DimensionSelection.Single) {
             throw Exception("Selection already set")
         }
         if(dimensionSelection == null) {
-            dimensionSelection = DimensionSelection.Complex()
+            dimensionSelection = DimensionSelection.Complex( sourceFolder = sourceFolder, packageName = packageName)
         }
-        (dimensionSelection as DimensionSelection.Complex).list.add(DimensionSelection.List(arrayListOf(*dimensions.toTypedArray())))
+        (dimensionSelection as DimensionSelection.Complex).list.add(DimensionSelection.List(arrayListOf(*dimensions.toTypedArray()),sourceFolder, packageName))
     }
 
-    fun range(from: Int, to: Int) {
+    fun range(from: Int, to: Int, sourceFolder: String = "",packageName: String = "") {
         if(dimensionSelection  is DimensionSelection.Single) {
             throw Exception("Selection already set")
         }
         if(dimensionSelection == null) {
-            dimensionSelection = DimensionSelection.Complex()
+            dimensionSelection = DimensionSelection.Complex(sourceFolder = sourceFolder, packageName = packageName)
         }
-        (dimensionSelection as DimensionSelection.Complex).list.add(DimensionSelection.Range(from, to))
+        (dimensionSelection as DimensionSelection.Complex).list.add(DimensionSelection.Range(from, to, sourceFolder, packageName))
     }
 }
 
 open class SingleDimensionSelectionExtension {
     var dimensionSelection: DimensionSelection.Single? = null
 
-    fun dimension(dimension: Int) {
+    fun dimension(dimension: Int, sourceFolder: String = "", packageName: String = "") {
         if (dimensionSelection != null) {
             throw Exception("Selection already set")
         }
-        dimensionSelection = DimensionSelection.Single(dimension)
+        dimensionSelection = DimensionSelection.Single(dimension, sourceFolder, packageName)
     }
 }
 
@@ -169,6 +232,9 @@ fun AlgebraicTypesExtension.dualities(configuration: DimensionSelectionExtension
     extension.configuration()
     dualities = extension.dimensionSelection
 }
+
+
+//fun AlgebraicTypesExtension.module()
 
 data class Outputs(
         val compile: ArrayList<String> = arrayListOf("main"),

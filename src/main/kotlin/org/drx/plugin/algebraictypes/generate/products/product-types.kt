@@ -16,9 +16,7 @@
 package org.drx.plugin.algebraictypes.generate.products
 
 import org.drx.plugin.algebraictypes.basePath
-import org.drx.plugin.algebraictypes.generate.buildGenericTypes
-import org.drx.plugin.algebraictypes.generate.dist
-import org.drx.plugin.algebraictypes.generate.license
+import org.drx.plugin.algebraictypes.generate.*
 import org.gradle.api.Project
 import java.io.File
 
@@ -29,17 +27,21 @@ import java.io.File
  *
  **********************************************************************************************************************/
 
-fun generateProductInterface(project: Project){
+fun generateProductInterface(project: Project, sourceFolder: String, domain: String, packageName: String){
 
-    val dir = File("${project.projectDir}$basePath/products")
+    //val dir = File("${project.projectDir}$basePath/products")
+    val dir = project.file(sourceFolder, domain, packageName.productsPackage())
+        //File("${project.projectDir}/$sourceFolder/${domain.fileCase()}/${packageName.fileCase()}")
     if(!dir.exists()) {
         dir.mkdirs()
     }
-    val file = File("${project.projectDir}$basePath/products/product.kt")
+    //val file = File("${project.projectDir}$basePath/products/product.kt")
+    val file = File(dir,"product.kt")
     if(!file.exists()) {
         var sum = license()
         sum += dist()
-        sum += "package org.drx.generated.products"
+        //sum += "package org.drx.generated.products"
+        sum += "package $domain.${packageName.productsPackage()}"
         sum += dist()
         sum += "interface Product"
         file.writeText(sum)
@@ -47,27 +49,20 @@ fun generateProductInterface(project: Project){
 }
 
 
-fun generateProductType(dimension: Int, project: Project) {
-
-    generateProductInterface(project)
-    /*
-    val dir = File("${project.projectDir}$basePath/products")
-    if (!dir.exists()) {
-        dir.mkdirs()
-    }
-    */
+fun generateProductType(dimension: Int, project: Project, sourceFolder: String,domain: String, packageName: String) {
+    
+    generateProductInterface(project, sourceFolder,domain, packageName)
+    
     var sumType = license()
-    sumType += "\n\npackage org.drx.generated.products\n\n\n"
+    sumType += "\n\npackage $domain.${packageName.productsPackage()}\n\n"
     sumType += buildProductType(dimension)
     sumType += dist()
     sumType += buildProductFunction(dimension)
     sumType += dist()
-    // sumType += buildProjectionFunctions( dimension )
     sumType += buildSimpleProjectionFunctions(dimension)
     sumType += dist()
     sumType += buildProductMaps(dimension)
-
-    val sumTypeFile = File("${project.projectDir}$basePath/products/product-$dimension.kt")
+    val sumTypeFile = File(project.file(sourceFolder, domain, packageName.productsPackage()),"product-$dimension.kt")
     sumTypeFile.writeText(sumType)
     println("Generating product type of dimension $dimension")
 }

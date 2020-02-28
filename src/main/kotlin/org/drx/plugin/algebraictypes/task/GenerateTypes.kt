@@ -51,33 +51,33 @@ open class GenerateTypes : DefaultTask() {
         // TODO optimize generation process
         // generate
         if(extension.evoleqSums != null) {
-            extension.evoleqSums!!.toSet().forEach {
-                generateEvoleqSum(it, project)
+            extension.evoleqSums!!.simplify().forEach {
+                generateEvoleqSum(it.dimension, project, it.sourceFolder,it.domain, it.packageName)
             }
         }
         if(extension.evoleqProducts != null) {
-            extension.evoleqProducts!!.toSet().forEach {
-                generateEvoleqProduct(it, project)
+            extension.evoleqProducts!!.simplify().forEach {
+                generateEvoleqProduct(it.dimension, project,it.sourceFolder,it.domain, it.packageName)
             }
         }
         if(extension.sumTypes != null) {
-            extension.sumTypes!!.toSet().forEach {
-                generateSumType(it, project)
+            extension.sumTypes!!.simplify().forEach {
+                generateSumType(it.dimension, project,it.sourceFolder,it.domain,it.packageName)
             }
         }
         if(extension.productTypes != null) {
-            extension.productTypes!!.toSet().forEach {
-                generateProductType(it, project)
+            extension.productTypes!!.simplify().forEach {
+                generateProductType(it.dimension, project, it.sourceFolder, it.domain, it.packageName)
             }
         }
         if(extension.dualities != null) {
-            extension.dualities!!.toSet().forEach {
-                generateDuality(it, project)
+            extension.dualities!!.simplify().forEach {
+                generateDuality(it.dimension, project, it.sourceFolder, it.domain, it.packageName)
             }
         }
         if(extension.productTypeArithmetics != null) {
-            extension.productTypeArithmetics!!.toSet().forEach {
-                generateProductTypeArithmetic(it, project)
+            extension.productTypeArithmetics!!.simplify().forEach {
+                generateProductTypeArithmetic(it.dimension, project,it.sourceFolder,it.domain,it.packageName)
             }
         }
 

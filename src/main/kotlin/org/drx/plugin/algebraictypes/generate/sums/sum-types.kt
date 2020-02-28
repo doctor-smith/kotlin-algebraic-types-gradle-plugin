@@ -16,9 +16,7 @@
 package org.drx.plugin.algebraictypes.generate.sums
 
 import org.drx.plugin.algebraictypes.basePath
-import org.drx.plugin.algebraictypes.generate.buildGenericTypes
-import org.drx.plugin.algebraictypes.generate.dist
-import org.drx.plugin.algebraictypes.generate.license
+import org.drx.plugin.algebraictypes.generate.*
 import org.gradle.api.Project
 import java.io.File
 
@@ -30,9 +28,9 @@ import java.io.File
  **********************************************************************************************************************/
 
 
-fun generateSumType(dimension: Int, project: Project) {
+fun generateSumType(dimension: Int, project: Project, sourceFolder: String, domain: String, packageName: String) {
 
-    generateSumInterface(project)
+    generateSumInterface(project, sourceFolder, domain, packageName)
 /*
     val dir = File("${project.projectDir}$basePath/sums")
     if(!dir.exists()) {
@@ -43,7 +41,7 @@ fun generateSumType(dimension: Int, project: Project) {
 
     var sumType = license()
 
-    sumType += "\n\npackage org.drx.generated.sums\n\n\n"
+    sumType += "\n\npackage $domain.${packageName.sumsPackage()}\n\n\n"
     sumType += buildSumType(dimension)
     sumType += dist()
     sumType += buildSumFunction(dimension)
@@ -54,24 +52,24 @@ fun generateSumType(dimension: Int, project: Project) {
     sumType += dist()
     sumType += buildSumMaps(dimension)
 
-    val sumTypeFile = File("${project.projectDir}$basePath/sums/sum-$dimension.kt")
+    val sumTypeFile = File(project.file(sourceFolder,domain,packageName.sumsPackage()),"sum-$dimension.kt")
     sumTypeFile.writeText(sumType)
     println("Generating sum type of dimension $dimension")
 }
 
-fun generateSumInterface(project: Project){
+fun generateSumInterface(project: Project, sourceFolder: String, domain: String, packageName: String){
 
 
 
-    val dir = File("${project.projectDir}$basePath/sums")
+    val dir = project.file(sourceFolder, domain, packageName.sumsPackage())
     if(!dir.exists()) {
         dir.mkdirs()
     }
-    val file = File("${project.projectDir}$basePath/sums/sum.kt")
+    val file = File(dir,"sum.kt")
     if(!file.exists()) {
         var sum = license()
         sum += dist()
-        sum += "package org.drx.generated.sums"
+        sum += "package $domain.${packageName.sumsPackage()}"
         sum += dist()
         sum += "interface Sum"
         file.writeText(sum)

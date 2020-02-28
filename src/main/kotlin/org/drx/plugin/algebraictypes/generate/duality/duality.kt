@@ -23,25 +23,25 @@ import org.gradle.api.Project
 import java.io.File
 
 
-fun generateDuality(dimension: Int, project: Project){
+fun generateDuality(dimension: Int, project: Project, sourceFolder: String, domain: String, packageName: String){
 
-    generateSumType(dimension, project)
-    generateProductType(dimension, project)
+    generateSumType(dimension, project, sourceFolder, domain, packageName.sumsPackage())
+    generateProductType(dimension, project, sourceFolder,domain, packageName.productsPackage())
 
-    val content = buildDuals(dimension)
-    val dir = File("${project.projectDir}$basePath/duality")
+    val content = buildDuals(dimension,domain,packageName)
+    val dir = project.file(sourceFolder, domain, packageName.dualityPackage())
     if(!dir.exists()) {
         dir.mkdirs()
     }
-    val file = File("${project.projectDir}$basePath/duality/duality-$dimension.kt")
+    val file = File(dir,"duality-$dimension.kt")
     file.writeText(content)
 }
 
-fun buildDuals(dimension: Int): String {
+fun buildDuals(dimension: Int,  domain: String, packageName: String): String {
     var result = license()
-    result += "\npackage org.drx.generated.duality\n\n\n"
-    result += "\nimport org.drx.generated.products.Product$dimension"
-    result += "\nimport org.drx.generated.sums.*"
+    result += "\npackage $domain.${packageName.dualityPackage()}\n\n\n"
+    result += "\nimport $domain.${packageName.productsPackage()}.Product$dimension"
+    result += "\nimport $domain.${packageName.sumsPackage()}.*"
     result += dist()
     result += dist()
     result += buildOpposeProductFunction(dimension)

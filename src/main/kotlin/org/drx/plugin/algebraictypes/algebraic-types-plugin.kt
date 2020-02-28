@@ -46,6 +46,7 @@ class KotlinAlgebraicTypesPlugin: Plugin<Project> {
         val extension = target.extensions.create<AlgebraicTypesExtension>("algebraicTypes")
         (extension as ExtensionAware).extensions.create<DimensionSelectionExtension>("dimensionSelection")
         (extension as ExtensionAware).extensions.create<OutputExtension>("outputSelection")
+        (extension as ExtensionAware).extensions.create<ModuleExtension>("module")
 
         val keysExtension = (extension as ExtensionAware).extensions.create<KeysExtension>("keys")
         (keysExtension as ExtensionAware).extensions.create<OutputExtension>("addKeys")

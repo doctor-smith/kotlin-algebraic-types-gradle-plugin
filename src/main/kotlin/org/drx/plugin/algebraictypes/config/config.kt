@@ -20,6 +20,10 @@ object Config {
         const val baseFolder = "/src/generated/kotlin/org/drx/generated"
         const val basePackage = "org.drx.generated"
 
+        object AlgebraicTypes {
+            const val packageName = "algebraic"
+        }
+        
         object Base {
             const val folderName = "/src/generated/kotlin/org/drx/generated"
             const val packageName = "org.drx.generated"

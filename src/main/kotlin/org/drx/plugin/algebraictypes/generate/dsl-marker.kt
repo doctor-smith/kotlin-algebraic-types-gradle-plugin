@@ -15,25 +15,23 @@
  */
 package org.drx.plugin.algebraictypes.generate
 
-import org.drx.plugin.algebraictypes.basePath
-import org.drx.plugin.algebraictypes.generate.optics.buildAuxiliaryFunctions
 import org.gradle.api.Project
 import java.io.File
 
-fun generateDslMarker(project: Project) {
-    val dir = File("${project.projectDir}$basePath")
+fun generateDslMarker(project: Project,sourceFolder: String, domain: String, packageName: String) {
+    val dir = project.file(sourceFolder, domain, packageName.annotationPackage())
     if(!dir.exists()) {
         dir.mkdirs()
     }
-    val file = File("${project.projectDir}$basePath/dsl-marker.kt")
+    val file = File(dir,"dsl-marker.kt")
     if(!file.exists()) {
-        file.writeText(buildDslMarkerFileContent())
+        file.writeText(buildDslMarkerFileContent("$domain.${packageName.annotationPackage()}"))
     }
 }
 
-fun buildDslMarkerFileContent(): String = """${license()}
+fun buildDslMarkerFileContent(packageName: String): String = """${license()}
     |
-    |package org.drx.generated
+    |package ${packageName.annotationPackage()}
     |
     |@DslMarker annotation class AlgebraicTypesDsl
 """.trimMargin()

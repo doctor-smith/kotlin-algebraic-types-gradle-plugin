@@ -34,38 +34,51 @@ import java.io.File
 // TODO Support other representatives than data classes
 // TODO Support kotlin serialization
 fun generatePseudoPrisms(dataClasses: DataClasses, project: Project) {
-    val dir = File("${project.projectDir}$basePath/prisms")
-    if(!dir.exists()) {
-        dir.mkdirs()
-    }
-    val file = File("${project.projectDir}$basePath/prisms/functions.kt")
-    file.writeText(buildAuxiliaryPrismFunctions())
-
-    generateDslMarker(project)
-
+    val algTypesFolder = "algtypes"
     // generate sums and products in all needed dimensions
     // sums
     with(dataClasses.sealedClasses.map {
-        it.representatives.size
-    }.toHashSet()){
-        //add(2)
+        SimplifiedDimensionSelection(it.representatives.size,it.sourceFolder, it.domain, it.packageName )
+    }.toHashSet()) set@{
+        with(hashSetOf<SimplifiedDimensionSelection>()) {
+            with(this) {
+                map{Triple(it.sourceFolder,it.domain, it.packageName)}.toHashSet().forEach {
+                    with(project.file(it.first,it.second,algTypesFolder.prismPackage())){
+                        if(!exists()) {
+                            mkdirs()
+                        }
+                        File(this, "functions.kt").writeText(buildAuxiliaryPrismFunctions("${it.second}.$algTypesFolder"))
+                        generateDslMarker(project, it.first, it.second,algTypesFolder)
+                    }
+                }
+            }
+            forEach {
+                add(SimplifiedDimensionSelection(2, it.sourceFolder, it.domain, it.packageName))
+            }
+            this@set.addAll(this)
+        }
         forEach {
-            generateSumType(it, project)
+            generateSumType(it.dimension, project, it.sourceFolder, it.domain, algTypesFolder)
         }
     }
 
     // products
     with(dataClasses.sealedClasses.map{clazz ->
-        clazz.representatives.map{ representative -> representative.parameters.size }
-    }.flatten().toHashSet()){
-        add(2)
+        clazz.representatives.map{
+            representative -> SimplifiedDimensionSelection(representative.parameters.size,clazz.sourceFolder,clazz.domain,clazz.packageName)
+        }
+    }.flatten().toHashSet()) set@{
+        with(hashSetOf<SimplifiedDimensionSelection>()) {
+            forEach {
+                add(SimplifiedDimensionSelection(2, it.sourceFolder, it.domain, it.packageName))
+            }
+            this@set.addAll(this)
+        }
         forEach {
-            generateProductType(it, project)
+            generateProductType(it.dimension, project, it.sourceFolder, it.domain,algTypesFolder)
         }
     }
-
     // build dependency
-
     // generate prisms
     dataClasses.sealedClasses.forEach {
         generatePseudoPrism(it, project)
@@ -609,9 +622,9 @@ fun parameters(sealedClass: SubSealedClass, offset: String): List<String> = seal
 
 
 
-fun buildAuxiliaryPrismFunctions(): String = """${license()}
+fun buildAuxiliaryPrismFunctions(packageName: String): String = """${license()}
     |
-    |package org.drx.generated.prisms
+    |package ${packageName.prismPackage()}
     |
     |${buildIdSetter()}
     |

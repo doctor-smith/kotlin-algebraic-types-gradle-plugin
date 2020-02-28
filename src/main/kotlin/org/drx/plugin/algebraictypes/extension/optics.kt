@@ -42,7 +42,10 @@ interface ClassRepresentation {
      * Ex: src/main/kotlin
      */
     var sourceFolder: String
-
+    /**
+     *
+     */
+    var domain: String
     /**
      * Parameters of the class
      */
@@ -71,6 +74,7 @@ interface ClassRepresentation {
  */
 open class DataClass : ClassRepresentation {
     override lateinit var name: String
+    override var domain: String = ""
     override var packageName: String = ""
     override var sourceFolder: String = ""
     override val parameters: ArrayList<Parameter> = arrayListOf()
@@ -85,6 +89,7 @@ open class DataClass : ClassRepresentation {
  */
 open class Object : ClassRepresentation {
     override lateinit var name: String
+    override var domain: String = ""
     override var packageName: String = ""
     override var sourceFolder: String = ""
     override val parameters: ArrayList<Parameter> = arrayListOf()
@@ -98,6 +103,7 @@ open class Object : ClassRepresentation {
  */
 open class Interface : ClassRepresentation {
     override lateinit var name: String
+    override var domain: String = ""
     override var packageName: String = ""
     override var sourceFolder: String = ""
     override val parameters: ArrayList<Parameter> = arrayListOf()
@@ -111,6 +117,7 @@ open class Interface : ClassRepresentation {
  */
 open class Class : ClassRepresentation {
     override lateinit var name: String
+    override var domain: String = ""
     override var packageName: String = ""
     override var sourceFolder: String = ""
     override val parameters: ArrayList<Parameter> = arrayListOf()
@@ -125,6 +132,7 @@ open class Class : ClassRepresentation {
  */
 open class SealedClass : ClassRepresentation {
     override lateinit var name: String
+    override var domain: String = ""
     override var packageName: String = ""
     override var sourceFolder: String = ""
     override val parameters: ArrayList<Parameter> = arrayListOf()
@@ -140,6 +148,7 @@ open class SealedClass : ClassRepresentation {
  */
 open class SubClass(open val parent: ClassRepresentation) : ClassRepresentation {
     override lateinit var name: String
+    override var domain: String = ""
     override var packageName: String = ""
     override var sourceFolder: String = ""
     override val parameters: ArrayList<Parameter> = arrayListOf()

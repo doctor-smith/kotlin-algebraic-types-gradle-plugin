@@ -16,30 +16,30 @@
 package org.drx.plugin.algebraictypes.generate.evoleq
 
 import org.drx.plugin.algebraictypes.basePath
-import org.drx.plugin.algebraictypes.generate.buildComment
-import org.drx.plugin.algebraictypes.generate.dist
+import org.drx.plugin.algebraictypes.generate.*
 import org.drx.plugin.algebraictypes.generate.products.generateProductType
-import org.drx.plugin.algebraictypes.generate.license
 import org.gradle.api.Project
 import java.io.File
-
-fun generateEvoleqProduct(dimension: Int, project: Project) {
-    val dir = File("${project.projectDir}$basePath/evoleq/products")
+// todo
+fun generateEvoleqProduct(dimension: Int, project: Project, sourceFolder: String, domain: String, packageName: String) {
+    //val dir = File("${project.projectDir}$basePath/evoleq/products")
+    val dir = project.file(sourceFolder, domain,packageName.evoleqProductPackage())
     if(!dir.exists()) {
         dir.mkdirs()
     }
-    generateProductType(dimension, project)
+    generateProductType(dimension, project, sourceFolder, domain, packageName.productsPackage())
 
     var evoleqProduct = license()
 
-    evoleqProduct += "\n\npackage org.drx.generated.evoleq.products\n\n\n"
+    //evoleqProduct += "\n\npackage org.drx.generated.evoleq.products\n\n\n"
+    evoleqProduct += "\n\npackage $domain.${packageName.evoleqProductPackage()}\n\n\n"
     evoleqProduct += "import kotlinx.coroutines.CoroutineScope\n"
     evoleqProduct += "import kotlinx.coroutines.launch\n"
     evoleqProduct += "import org.drx.evoleq.dsl.parallel\n"
     evoleqProduct += "import org.drx.evoleq.flow.Evolver\n"
     evoleqProduct += "import org.drx.evoleq.evolving.Evolving\n"
     evoleqProduct += "import org.drx.evoleq.evolving.Parallel\n"
-    evoleqProduct += "import org.drx.generated.products.Product$dimension\n\n"
+    evoleqProduct += "import $domain.${packageName.productsPackage()}.Product$dimension\n\n"
     evoleqProduct += dist()
     evoleqProduct += buildProductEvolveFunction(dimension)
     evoleqProduct += dist()
@@ -47,9 +47,7 @@ fun generateEvoleqProduct(dimension: Int, project: Project) {
     evoleqProduct += dist()
     evoleqProduct += buildProductGetFunction(dimension)
 
-
-
-    val evoleqProductFile = File("${project.projectDir}$basePath/evoleq/products/product-$dimension.kt")
+    val evoleqProductFile = File(dir,"evoleq-product-$dimension.kt")
     evoleqProductFile.writeText(evoleqProduct)
     println("Generating evoleq product types of dimension $dimension")
 }

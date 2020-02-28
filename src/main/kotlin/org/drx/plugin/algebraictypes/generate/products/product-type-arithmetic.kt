@@ -16,20 +16,18 @@
 package org.drx.plugin.algebraictypes.generate.products
 
 import org.drx.plugin.algebraictypes.basePath
-import org.drx.plugin.algebraictypes.generate.buildGenericTypes
-import org.drx.plugin.algebraictypes.generate.dist
-import org.drx.plugin.algebraictypes.generate.license
+import org.drx.plugin.algebraictypes.generate.*
 import org.gradle.api.Project
 import java.io.File
 
-fun generateProductTypeArithmetic(dimension: Int, project: Project) {
-    IntRange(2, dimension).forEach { generateProductType(it, project) }
+fun generateProductTypeArithmetic(dimension: Int, project: Project, sourceFolder: String, domain: String, packageName : String) {
+    IntRange(2, dimension).forEach { generateProductType(it, project, sourceFolder,domain, packageName) }
 
     var sumType = license()
-    sumType += "\n\npackage org.drx.generated.products\n\n\n"
+    sumType += "\n\npackage $domain.${packageName.productsPackage()}\n\n\n"
     sumType += buildProductOperators(dimension)
 
-    val sumTypeFile = File("${project.projectDir}$basePath/products/product-arithmetic-$dimension.kt")
+    val sumTypeFile = File(project.file(sourceFolder,domain,packageName.productsPackage()),"product-arithmetic-$dimension.kt")
     sumTypeFile.writeText(sumType)
     println("Generating product type arithmetic of dimension $dimension")
 

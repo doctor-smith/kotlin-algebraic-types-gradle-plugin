@@ -16,37 +16,35 @@
 package org.drx.plugin.algebraictypes.generate.evoleq
 
 import org.drx.plugin.algebraictypes.basePath
-import org.drx.plugin.algebraictypes.generate.buildComment
-import org.drx.plugin.algebraictypes.generate.dist
+import org.drx.plugin.algebraictypes.generate.*
 import org.drx.plugin.algebraictypes.generate.products.generateProductType
-import org.drx.plugin.algebraictypes.generate.license
 import org.gradle.api.Project
 import java.io.File
 
-fun generateEvoleqSum(dimension: Int, project: Project) {
-    val dir = File("${project.projectDir}$basePath/evoleq/sums")
+fun generateEvoleqSum(dimension: Int, project: Project,sourceFolder: String,domain: String, packageName: String) {
+    val dir = project.file(sourceFolder,domain,packageName.evoleqSumPackage())
     if(!dir.exists()) {
         dir.mkdirs()
     }
-    generateProductType(dimension, project)
+    generateProductType(dimension, project,sourceFolder,domain, packageName.productsPackage())
 
     var evoleqProduct = license()
 
-    evoleqProduct += "\n\npackage org.drx.generated.evoleq.sums\n\n\n"
+    evoleqProduct += "\n\npackage $domain.${packageName.evoleqSumPackage()}\n\n\n"
     evoleqProduct += "import org.drx.evoleq.flow.Evolver\n"
     evoleqProduct += "import org.drx.evoleq.evolving.Evolving\n"
     if(dimension != 2) {
-        evoleqProduct += "import org.drx.generated.products.Product2\n"
+        evoleqProduct += "import $domain.${packageName.productsPackage()}.Product2\n"
     }
-    evoleqProduct += "import org.drx.generated.products.Product$dimension\n"
-    evoleqProduct += "import org.drx.generated.sums.Sum$dimension\n\n"
+    evoleqProduct += "import $domain.${packageName.productsPackage()}.Product$dimension\n"
+    evoleqProduct += "import $domain.${packageName.sumsPackage()}.Sum$dimension\n\n"
     evoleqProduct += dist()
     evoleqProduct += buildSumEvolveFunction(dimension)
     evoleqProduct += dist()
     evoleqProduct += buildSumGetFunction(dimension)
 
 
-    val evoleqProductFile = File("${project.projectDir}$basePath/evoleq/sums/sum-$dimension.kt")
+    val evoleqProductFile = File(dir,"sum-$dimension.kt")
     evoleqProductFile.writeText(evoleqProduct)
     println("Generating evoleq sum types of dimension $dimension")
 }
